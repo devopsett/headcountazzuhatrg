@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azzuha Group Travel & Tours - Kehadiran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    .pop-anim {
+      animation: pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.22s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 pb-14 selection:bg-emerald-600 selection:text-white">
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-30 backdrop-blur-md bg-emerald-900/90 border-b border-emerald-700/60 text-white shadow-sm">
+    <div class="max-w-md mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-emerald-950 flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
+          <i class="fa-solid fa-kaaba text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-sm sm:text-base tracking-tight leading-snug text-white">Azzuha Group Travel & Tours</h1>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-300 animate-pulse"></span>
+            <p id="syncStatus" class="text-[11px] font-medium text-emerald-100/90">Mod Demo (Sedia Digunakan)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Switcher & Admin Tools -->
+      <div class="flex items-center bg-emerald-950/60 p-1 rounded-xl border border-emerald-700/50">
+        <button onclick="switchMode('kiosk')" id="btnModeKiosk" class="px-3 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <span>Jemaah</span>
+        </button>
+        <button onclick="switchMode('staff')" id="btnModeStaff" class="px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1" title="Paparan Urusetia">
+          <i class="fa-solid fa-user-shield"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 pt-5 space-y-4">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: SKRIN JEMAAH KEY-IN (DEFAULT KIOSK) -->
+    <!-- ========================================== -->
+    <section id="mode-kiosk" class="space-y-4">
+
+      <!-- Main Card Container -->
+      <div class="bg-white rounded-3xl shadow-xl shadow-emerald-950/5 border border-slate-200/90 overflow-hidden relative">
+        
+        <!-- Card Banner Header -->
+        <div class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 px-6 py-5 text-white relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 text-white/10 text-8xl pointer-events-none">
+            <i class="fa-solid fa-mosque"></i>
+          </div>
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider bg-white/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-amber-300 mb-1.5">
+            <i class="fa-solid fa-sparkles text-[10px]"></i> Buku Kehadiran Digital
+          </span>
+          <h2 class="text-xl font-extrabold tracking-tight">Daftar Kehadiran Jemaah</h2>
+          <p class="text-xs text-emerald-100/90 mt-0.5">Sila lengkapkan maklumat ringkas di bawah.</p>
+        </div>
+
+        <!-- Form Body -->
+        <form id="kioskForm" onsubmit="submitKioskCheckIn(event)" class="p-6 space-y-5">
+          
+          <!-- 1. Nama Jemaah -->
+          <div>
+            <label for="kName" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Nama Jemaah <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                <i class="fa-solid fa-user text-sm"></i>
+              </div>
+              <input type="text" id="kName" required placeholder="Contoh: Hj Ahmad bin Ali"
+                class="w-full pl-14 pr-4 py-3.5 text-base font-semibold text-slate-800 bg-slate-50/80 border-2 border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all placeholder:font-normal placeholder:text-slate-400" />
+            </div>
+          </div>
+
+          <!-- 2. No Telefon (Pilihan) -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="kPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                No. Telefon / WhatsApp
+              </label>
+              <span class="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Pilihan</span>
+            </div>
+            <div class="relative">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                <i class="fa-solid fa-phone text-sm"></i>
+              </div>
+              <input type="tel" id="kPhone" placeholder="Contoh: 0123456789"
+                class="w-full pl-14 pr-4 py-3.5 text-base font-semibold text-slate-800 bg-slate-50/80 border-2 border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all placeholder:font-normal placeholder:text-slate-400" />
+            </div>
+          </div>
+
+          <!-- 3. Bilangan Pax (Stepper + Quick Buttons) -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Bilangan Kehadiran (Pax)
+            </label>
+            <div class="flex items-center gap-2.5 bg-slate-50 p-2 rounded-2xl border-2 border-slate-200/80">
+              <button type="button" onclick="adjustKioskPax(-1)" 
+                class="w-12 h-12 rounded-xl bg-white hover:bg-slate-100 active:scale-95 text-slate-700 text-base font-bold flex items-center justify-center transition shadow-sm border border-slate-200/80">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <div class="flex-1 text-center py-0.5">
+                <span id="kPaxDisplay" class="text-3xl font-extrabold text-emerald-700 leading-none inline-block">1</span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mt-0.5">Orang</span>
+                <input type="hidden" id="kPax" value="1" />
+              </div>
+              <button type="button" onclick="adjustKioskPax(1)" 
+                class="w-12 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-base font-bold flex items-center justify-center transition shadow-sm shadow-emerald-600/20">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+            <!-- Quick Pax Presets -->
+            <div class="grid grid-cols-4 gap-2 mt-2">
+              <button type="button" onclick="setKioskPax(1)" data-pax-btn="1" class="pax-preset-btn py-2 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">1 Pax</button>
+              <button type="button" onclick="setKioskPax(2)" data-pax-btn="2" class="pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition">2 Pax</button>
+              <button type="button" onclick="setKioskPax(4)" data-pax-btn="4" class="pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition">4 Pax</button>
+              <button type="button" onclick="setKioskPax(6)" data-pax-btn="6" class="pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition">6 Pax</button>
+            </div>
+          </div>
+
+          <!-- 4. Kategori -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Kategori Pilihan
+            </label>
+            <div class="grid grid-cols-3 gap-2.5" id="kioskInterestPills">
+              <button type="button" onclick="selectKioskInterest('Umrah')" data-val="Umrah"
+                class="k-interest-btn py-3 px-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-xs flex flex-col items-center justify-center gap-1.5 shadow-sm transition-all">
+                <i class="fa-solid fa-kaaba text-base text-emerald-600"></i>
+                <span>Umrah</span>
+              </button>
+              <button type="button" onclick="selectKioskInterest('Haji')" data-val="Haji"
+                class="k-interest-btn py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex flex-col items-center justify-center gap-1.5 transition-all">
+                <i class="fa-solid fa-mosque text-base text-slate-400"></i>
+                <span>Haji</span>
+              </button>
+              <button type="button" onclick="selectKioskInterest('Lain-lain')" data-val="Lain-lain"
+                class="k-interest-btn py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex flex-col items-center justify-center gap-1.5 transition-all">
+                <i class="fa-solid fa-compass text-base text-slate-400"></i>
+                <span>Lain-lain</span>
+              </button>
+            </div>
+
+            <!-- Sub-pilihan khusus apabila 'Haji' dipilih -->
+            <div id="hajiSubOptions" class="hidden mt-3 p-3.5 bg-gradient-to-br from-emerald-50 to-teal-50/60 border-2 border-emerald-200/80 rounded-2xl fade-in">
+              <div class="flex items-center justify-between mb-2.5">
+                <label class="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-Sliders text-emerald-600"></i> Pilih Status Haji Anda:
+                </label>
+                <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-200/70 text-emerald-900 px-2 py-0.5 rounded-full">Wajib Pilih</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" onclick="selectHajiType('Haji (Rayuan)')" data-haji="Haji (Rayuan)"
+                  class="haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-white text-emerald-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all">
+                  <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                  <span>Rayuan</span>
+                </button>
+                <button type="button" onclick="selectHajiType('Haji (P1)')" data-haji="Haji (P1)"
+                  class="haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-slate-200/90 bg-white/70 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 transition-all">
+                  <i class="fa-regular fa-circle text-slate-400 text-sm"></i>
+                  <span>P1 (Terpilih)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-1">
+            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99] text-white font-extrabold py-4 rounded-2xl text-base shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2.5">
+              <span>Hantar Kehadiran</span>
+              <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Thank You Overlay after Check-In -->
+        <div id="thankYouOverlay" class="hidden absolute inset-0 bg-white/95 backdrop-blur-md p-6 flex-col items-center justify-center text-center z-20 fade-in">
+          <div class="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mb-4 shadow-inner">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full mb-2">Pendaftaran Berjaya</span>
+          <h3 class="text-2xl font-extrabold text-slate-800">Terima Kasih, <span id="tyName" class="text-emerald-700"></span>!</h3>
+          <p class="text-sm text-slate-500 mt-1.5">Kehadiran (<span id="tyPax" class="font-bold text-slate-700">1 orang</span>) bagi kategori <span id="tyInterest" class="font-bold text-emerald-700">Umrah</span> telah direkodkan.</p>
+          <button onclick="closeThankYouOverlay()" class="mt-6 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md transition">
+            Daftar Jemaah Seterusnya
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: SKRIN PETUGAS / ADMIN PANEL        -->
+    <!-- ========================================== -->
+    <section id="mode-staff" class="hidden space-y-4">
+
+      <!-- Admin Toolbar -->
+      <div class="bg-slate-900 text-white rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-amber-400 shrink-0">
+            <i class="fa-solid fa-user-tie text-sm"></i>
+          </div>
+          <input id="staffName" type="text" placeholder="Nama Petugas (Cth: Ustaz Faris)" 
+            class="bg-slate-800/90 text-white text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-amber-400 w-full"
+            onchange="localStorage.setItem('booth_staff', this.value)" />
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="toggleBackendModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition" title="Kod Apps Script">
+            <i class="fa-solid fa-code text-emerald-400"></i>
+            <span>Kod Sheet</span>
+          </button>
+          <button onclick="fetchStats()" class="p-2 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs border border-slate-700 transition" title="Muat Semula">
+            <i id="refreshIcon" class="fa-solid fa-rotate"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Scoreboard -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Hari Ini</span>
+            <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-calendar-day"></i>
+            </span>
+          </div>
+          <div id="todayPax" class="text-4xl font-extrabold text-emerald-600 mt-2 leading-none">0</div>
+          <div class="text-xs text-slate-500 mt-2 font-medium"><span id="todayGroups" class="font-bold text-slate-700">0</span> pendaftaran</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Keseluruhan</span>
+            <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-users"></i>
+            </span>
+          </div>
+          <div id="totalPax" class="text-4xl font-extrabold text-slate-800 mt-2 leading-none">0</div>
+          <div class="text-xs text-slate-500 mt-2 font-medium"><span id="totalGroups" class="font-bold text-slate-700">0</span> jumlah rekod</div>
+        </div>
+      </div>
+
+      <!-- Staff Quick Tap Walk-in Counter -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-bolt text-amber-500"></i> Kaunter Pantas Walk-In
+          </h2>
+          <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">Tanpa Nama</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="quickCount(1)" class="bg-emerald-600 active:scale-95 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-sm shadow-sm transition">+1 Pax</button>
+          <button onclick="quickCount(2)" class="bg-emerald-600 active:scale-95 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-sm shadow-sm transition">+2 Pax</button>
+          <button onclick="quickCount(4)" class="bg-teal-600 active:scale-95 hover:bg-teal-700 text-white font-extrabold py-3 rounded-xl text-sm shadow-sm transition">+4 Pax</button>
+          <button onclick="quickCount(-1)" class="bg-rose-50 active:scale-95 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold py-3 rounded-xl text-sm transition">-1</button>
+        </div>
+      </div>
+
+      <!-- Category Analytics & Export -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-pie text-emerald-600"></i> Pecahan Kategori Jemaah
+          </h2>
+          <button onclick="exportCSV()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-file-csv"></i> Eksport CSV
+          </button>
+        </div>
+        <div id="categoryBreakdown" class="space-y-2.5 pt-1"></div>
+      </div>
+
+      <!-- Full Logs List with WhatsApp Follow-Up -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check text-emerald-600"></i> Senarai Kehadiran & WhatsApp
+          </h2>
+          <div class="flex items-center gap-2">
+            <span id="logCountBadge" class="text-[11px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">0 rekod</span>
+            <button onclick="clearLocalDemo()" id="clearDemoBtn" class="text-[11px] font-semibold text-rose-500 hover:underline hidden">Reset</button>
+          </div>
+        </div>
+        <div id="recentList" class="divide-y divide-slate-100 text-sm max-h-80 overflow-y-auto pr-1"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg">Disimpan!</span>
+  </div>
+
+  <!-- Settings Modal for Apps Script URL -->
+  <div id="configModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-xl">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <i class="fa-solid fa-link text-emerald-600"></i> Sambungan Google Sheet
+        </h3>
+        <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Tampal URL <strong>Web App Google Apps Script</strong> anda supaya semua nama jemaah terus masuk ke dalam Google Sheet.
+      </p>
+      <div>
+        <label class="text-xs font-semibold text-slate-600">Google Apps Script Web App URL</label>
+        <input id="scriptUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+          class="w-full mt-1 px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+      </div>
+      <div class="flex gap-2">
+        <button onclick="saveConfig()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs transition">
+          Simpan & Sambung
+        </button>
+        <button onclick="useDemoMode()" class="px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-xs transition">
+          Mod Demo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend Code Modal (Apps Script Copy) -->
+  <div id="backendModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 shadow-xl max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="font-bold text-base">Kod & URL Google Apps Script</h3>
+          <p class="text-xs text-slate-500">Salin kod backend dan tetapkan URL terus dalam kod sistem</p>
+        </div>
+        <button onclick="toggleBackendModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">1. URL Web App Google Sheet (Tetapan Backend)</label>
+        <div class="flex gap-2">
+          <input id="scriptUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono" />
+          <button onclick="saveBackendUrl()" class="px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shrink-0 transition">
+            Simpan
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5 pt-1">
+        <label class="text-xs font-bold text-slate-700">2. Kod Google Apps Script (`Code.gs`)</label>
+        <pre id="gasCodeBlock" class="bg-slate-900 text-emerald-300 text-[11px] p-3 rounded-xl overflow-auto h-48 leading-relaxed font-mono select-all">const SHEET_NAME = 'Headcount_Log';
+
+function setupSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.appendRow(['Timestamp','Date','Time','Entry Type','Pax Count','Visitor Name','Phone','Interest / Package','Staff / Booth PIC','Notes']);
+    sheet.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#f3f4f6');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function doGet() {
+  const sheet = setupSheet();
+  const rows = sheet.getDataRange().getValues().slice(1);
+  const tz = Session.getScriptTimeZone();
+  const todayStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  let totalPax = 0, todayPax = 0, todayGroups = 0;
+  const recentLogs = [];
+
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const r = rows[i];
+    const pax = parseInt(r[4]) || 0;
+    const rowDate = r[1] instanceof Date ? Utilities.formatDate(r[1], tz, 'yyyy-MM-dd') : String(r[1]);
+    totalPax += pax;
+    if (rowDate === todayStr) { todayPax += pax; todayGroups++; }
+    if (recentLogs.length < 30) {
+      recentLogs.push({ date: rowDate, time: String(r[2]), type: r[3], pax, name: r[5], phone: String(r[6]||''), interest: r[7], staff: r[8], notes: r[9] });
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'success',
+    stats: { todayPax, totalPax, todayGroups, totalGroups: rows.length },
+    recentLogs
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheet = setupSheet();
+  const p = JSON.parse(e.postData.contents);
+  const now = new Date(), tz = Session.getScriptTimeZone();
+  sheet.appendRow([
+    now.toISOString(),
+    Utilities.formatDate(now, tz, 'yyyy-MM-dd'),
+    Utilities.formatDate(now, tz, 'HH:mm:ss'),
+    p.type || 'Self Check-In',
+    parseInt(p.pax) || 1,
+    p.name || 'Tetamu Jemaah',
+    p.phone ? "'" + p.phone : '',
+    p.interest || 'Umrah',
+    p.staff || '',
+    p.notes || ''
+  ]);
+  return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+      </div>
+
+      <button onclick="copyGasCode()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-xl text-xs transition">
+        <i class="fa-regular fa-copy mr-1"></i> Salin Kod Apps Script
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Tetapkan URL Apps Script secara kekal di sini sebagai backend lalai (jika mahu hardcode dalam kod)
+    const DEFAULT_SCRIPT_URL = '';
+    let selectedKioskInterest = 'Umrah';
+    let selectedHajiSubType = 'Haji (Rayuan)';
+    let thankYouTimer = null;
+
+    // Sample initial data
+    const SAMPLE_DEMO_LOGS = [
+      { date: getTodayStr(), time: '12:15:10', type: 'Self Check-In', pax: 4, name: 'Hj Kamarul & Keluarga', phone: '0192837465', interest: 'Umrah', staff: 'Kiosk Booth', notes: '' },
+      { date: getTodayStr(), time: '11:50:22', type: 'Self Check-In', pax: 2, name: 'Pn Hajah Siti Sarah', phone: '0139988776', interest: 'Haji (Rayuan)', staff: 'Kiosk Booth', notes: '' },
+      { date: getTodayStr(), time: '11:35:40', type: 'Self Check-In', pax: 2, name: 'Tn Hj Mahmud & Isteri', phone: '0123344556', interest: 'Haji (P1)', staff: 'Kiosk Booth', notes: '' },
+      { date: getTodayStr(), time: '11:20:05', type: 'Self Check-In', pax: 3, name: 'En Faizal bin Roslan', phone: '0174455661', interest: 'Umrah', staff: 'Kiosk Booth', notes: '' },
+      { date: getTodayStr(), time: '10:45:19', type: 'Self Check-In', pax: 1, name: 'Ustaz Ridzuan', phone: '', interest: 'Lain-lain', staff: 'Kiosk Booth', notes: '' }
+    ];
+
+    function getTodayStr() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function getTimeStr() {
+      return new Date().toTimeString().split(' ')[0];
+    }
+
+    function getScriptUrl() {
+      return (localStorage.getItem('jemaah_script_url') || DEFAULT_SCRIPT_URL).trim();
+    }
+
+    function getLocalLogs() {
+      const raw = localStorage.getItem('jemaah_demo_logs');
+      if (!raw) {
+        localStorage.setItem('jemaah_demo_logs', JSON.stringify(SAMPLE_DEMO_LOGS));
+        return [...SAMPLE_DEMO_LOGS];
+      }
+      return JSON.parse(raw);
+    }
+
+    function saveLocalLogs(logs) {
+      localStorage.setItem('jemaah_demo_logs', JSON.stringify(logs));
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('staffName').value = localStorage.getItem('booth_staff') || 'Ustaz Faris';
+      document.getElementById('scriptUrlInput').value = getScriptUrl();
+      fetchStats();
+    });
+
+    function switchMode(mode) {
+      const isKiosk = mode === 'kiosk';
+      document.getElementById('mode-kiosk').classList.toggle('hidden', !isKiosk);
+      document.getElementById('mode-staff').classList.toggle('hidden', isKiosk);
+
+      document.getElementById('btnModeKiosk').className = isKiosk
+        ? 'px-3 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5'
+        : 'px-3 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1.5';
+
+      document.getElementById('btnModeStaff').className = !isKiosk
+        ? 'px-2.5 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1'
+        : 'px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1';
+    }
+
+    function adjustKioskPax(delta) {
+      const input = document.getElementById('kPax');
+      let val = (parseInt(input.value) || 1) + delta;
+      if (val < 1) val = 1;
+      if (val > 50) val = 50;
+      setKioskPax(val);
+    }
+
+    function setKioskPax(val) {
+      document.getElementById('kPax').value = val;
+      const disp = document.getElementById('kPaxDisplay');
+      disp.textContent = val;
+      animateCounter('kPaxDisplay');
+
+      document.querySelectorAll('.pax-preset-btn').forEach(btn => {
+        if (parseInt(btn.dataset.paxBtn) === val) {
+          btn.className = 'pax-preset-btn py-2 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition';
+        } else {
+          btn.className = 'pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition';
+        }
+      });
+    }
+
+    function selectKioskInterest(val) {
+      const hajiBox = document.getElementById('hajiSubOptions');
+      if (val === 'Haji') {
+        hajiBox.classList.remove('hidden');
+        selectedKioskInterest = selectedHajiSubType;
+      } else {
+        hajiBox.classList.add('hidden');
+        selectedKioskInterest = val;
+      }
+
+      document.querySelectorAll('.k-interest-btn').forEach(btn => {
+        const icon = btn.querySelector('i');
+        if (btn.dataset.val === val) {
+          btn.className = 'k-interest-btn py-3 px-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-xs flex flex-col items-center justify-center gap-1.5 shadow-sm transition-all';
+          if (icon) {
+            icon.classList.remove('text-slate-400');
+            icon.classList.add('text-emerald-600');
+          }
+        } else {
+          btn.className = 'k-interest-btn py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex flex-col items-center justify-center gap-1.5 transition-all';
+          if (icon) {
+            icon.classList.remove('text-emerald-600');
+            icon.classList.add('text-slate-400');
+          }
+        }
+      });
+    }
+
+    function selectHajiType(subVal) {
+      selectedHajiSubType = subVal;
+      selectedKioskInterest = subVal;
+      document.querySelectorAll('.haji-sub-btn').forEach(btn => {
+        const icon = btn.querySelector('i');
+        if (btn.dataset.haji === subVal) {
+          btn.className = 'haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-white text-emerald-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all';
+          if (icon) icon.className = 'fa-solid fa-circle-check text-emerald-600 text-sm';
+        } else {
+          btn.className = 'haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-slate-200/90 bg-white/70 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 transition-all';
+          if (icon) icon.className = 'fa-regular fa-circle text-slate-400 text-sm';
+        }
+      });
+    }
+
+    function submitKioskCheckIn(e) {
+      e.preventDefault();
+      const name = document.getElementById('kName').value.trim();
+      const pax = parseInt(document.getElementById('kPax').value) || 1;
+      const phone = document.getElementById('kPhone').value.trim();
+      const staff = document.getElementById('staffName').value.trim() || 'Kiosk Self-CheckIn';
+
+      if (!name) return;
+
+      sendPayload({
+        type: 'Self Check-In',
+        name: name,
+        pax: pax,
+        phone: phone,
+        interest: selectedKioskInterest,
+        staff: staff,
+        notes: ''
+      });
+
+      // Show welcoming Thank You overlay
+      document.getElementById('tyName').textContent = name;
+      document.getElementById('tyPax').textContent = `${pax} orang`;
+      document.getElementById('tyInterest').textContent = selectedKioskInterest;
+      const overlay = document.getElementById('thankYouOverlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      // Reset form for the next Jemaah
+      document.getElementById('kName').value = '';
+      document.getElementById('kPhone').value = '';
+      setKioskPax(1);
+
+      if (thankYouTimer) clearTimeout(thankYouTimer);
+      thankYouTimer = setTimeout(closeThankYouOverlay, 3200);
+    }
+
+    function closeThankYouOverlay() {
+      const overlay = document.getElementById('thankYouOverlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      document.getElementById('kName').focus();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('opacity-0');
+      setTimeout(() => t.classList.add('opacity-0'), 1800);
+    }
+
+    function animateCounter(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('pop-anim');
+      void el.offsetWidth;
+      el.classList.add('pop-anim');
+    }
+
+    function setStatus(msg, mode = 'demo') {
+      const el = document.getElementById('syncStatus');
+      const dot = document.getElementById('statusDot');
+      el.textContent = msg;
+      if (mode === 'live') {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-300';
+      } else if (mode === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-rose-400';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-300';
+      }
+    }
+
+    function toggleConfigModal() {
+      const modal = document.getElementById('configModal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function toggleBackendModal() {
+      const modal = document.getElementById('backendModal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function copyGasCode() {
+      const code = document.getElementById('gasCodeBlock').innerText;
+      const temp = document.createElement('textarea');
+      temp.value = code;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      showToast('Kod Apps Script disalin!');
+    }
+
+    function saveBackendUrl() {
+      const val = document.getElementById('scriptUrlInput').value.trim();
+      localStorage.setItem('jemaah_script_url', val);
+      toggleBackendModal();
+      fetchStats();
+      showToast(val ? 'URL Google Sheet disimpan!' : 'Mod Demo diaktifkan');
+    }
+
+    function useDemoMode() {
+      document.getElementById('scriptUrlInput').value = '';
+      localStorage.removeItem('jemaah_script_url');
+      toggleConfigModal();
+      fetchStats();
+      showToast('Mod Demo Tempatan aktif');
+    }
+
+    function clearLocalDemo() {
+      localStorage.setItem('jemaah_demo_logs', JSON.stringify([]));
+      fetchStats();
+      showToast('Rekod demo telah dikosongkan');
+    }
+
+    async function fetchStats() {
+      const url = getScriptUrl();
+      const icon = document.getElementById('refreshIcon');
+      if (icon) icon.classList.add('fa-spin');
+
+      if (!url) {
+        const logs = getLocalLogs();
+        const today = getTodayStr();
+        let todayPax = 0, totalPax = 0, todayGroups = 0;
+
+        logs.forEach(r => {
+          const p = parseInt(r.pax) || 0;
+          totalPax += p;
+          if (r.date === today) {
+            todayPax += p;
+            todayGroups++;
+          }
+        });
+
+        updateScoreboard({ todayPax, totalPax, todayGroups, totalGroups: logs.length }, logs);
+        document.getElementById('clearDemoBtn').classList.remove('hidden');
+        setStatus('Mod Demo (Simpanan Tempatan)', 'demo');
+        setTimeout(() => icon && icon.classList.remove('fa-spin'), 250);
+        return;
+      }
+
+      document.getElementById('clearDemoBtn').classList.add('hidden');
+      setStatus('Menyegerak Google Sheet...', 'live');
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.status === 'success') {
+          updateScoreboard(data.stats, data.recentLogs);
+          setStatus('Google Sheet Aktif • ' + new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }), 'live');
+        }
+      } catch (err) {
+        setStatus('Gagal sambung Sheet (Semak URL)', 'error');
+      } finally {
+        if (icon) icon.classList.remove('fa-spin');
+      }
+    }
+
+    function updateScoreboard(stats, logs) {
+      document.getElementById('todayPax').textContent = stats.todayPax;
+      document.getElementById('totalPax').textContent = stats.totalPax;
+      document.getElementById('todayGroups').textContent = stats.todayGroups;
+      document.getElementById('totalGroups').textContent = stats.totalGroups;
+      document.getElementById('logCountBadge').textContent = `${logs.length} rekod`;
+      renderRecentLogs(logs);
+      renderCategoryBreakdown(logs);
+    }
+
+    async function sendPayload(payload) {
+      const url = getScriptUrl();
+      const record = {
+        date: getTodayStr(),
+        time: getTimeStr(),
+        type: payload.type || 'Self Check-In',
+        pax: parseInt(payload.pax) || 1,
+        name: payload.name || 'Tetamu Jemaah',
+        phone: payload.phone || '',
+        interest: payload.interest || 'Umrah',
+        staff: payload.staff || '',
+        notes: payload.notes || ''
+      };
+
+      animateCounter('todayPax');
+      animateCounter('totalPax');
+
+      if (!url) {
+        const logs = getLocalLogs();
+        logs.unshift(record);
+        saveLocalLogs(logs);
+        fetchStats();
+        showToast(`Kehadiran ${record.name} (${record.pax} pax) disimpan!`);
+        return;
+      }
+
+      // Optimistic UI update
+      const todayEl = document.getElementById('todayPax');
+      const totalEl = document.getElementById('totalPax');
+      const nextToday = parseInt(todayEl.textContent || 0) + record.pax;
+      todayEl.textContent = nextToday;
+      totalEl.textContent = parseInt(totalEl.textContent || 0) + record.pax;
+
+      setStatus('Menyimpan ke Google Sheet...', 'live');
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(record)
+        });
+        showToast('Disimpan ke Google Sheet!');
+        setTimeout(fetchStats, 900);
+      } catch (err) {
+        setStatus('Ralat menyimpan ke Sheet!', 'error');
+      }
+    }
+
+    function quickCount(paxAmount) {
+      const staff = document.getElementById('staffName').value.trim();
+      sendPayload({
+        type: 'Quick Walk-in',
+        pax: paxAmount,
+        name: 'Walk-in Jemaah',
+        interest: 'Lain-lain',
+        staff: staff
+      });
+    }
+
+    function formatWhatsAppLink(phone, name, interest) {
+      let clean = phone.replace(/\D/g, '');
+      if (clean.startsWith('0')) clean = '6' + clean;
+      const text = encodeURIComponent(`Assalamualaikum ${name}, terima kasih kerana singgah & mendaftar di booth kami tadi berkenaan ${interest}. Jika ada sebarang soalan lanjut, boleh balas mesej ini ya.`);
+      return `https://wa.me/${clean}?text=${text}`;
+    }
+
+    function renderRecentLogs(logs) {
+      const container = document.getElementById('recentList');
+      if (!logs || logs.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 text-xs text-center py-6">Tiada rekod kehadiran lagi.</p>';
+        return;
+      }
+
+      container.innerHTML = logs.map(item => {
+        const badgeColor = item.pax > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+        const paxSign = item.pax > 0 ? `+${item.pax}` : item.pax;
+        const waBtn = item.phone ? `
+          <a href="${formatWhatsAppLink(item.phone, item.name, item.interest)}" target="_blank"
+             class="text-emerald-700 hover:bg-emerald-100 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold inline-flex items-center gap-1 transition">
+            <i class="fa-brands fa-whatsapp text-sm"></i> WA
+          </a>` : '';
+
+        return `
+          <div class="py-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="${badgeColor} font-bold text-xs px-2.5 py-1 rounded-lg shrink-0 min-w-[36px] text-center">${paxSign}</span>
+              <div class="truncate">
+                <div class="font-semibold text-slate-800 truncate text-xs sm:text-sm">${item.name}</div>
+                <div class="text-[11px] text-slate-400 truncate">
+                  ${item.time} • <span class="text-slate-600 font-medium">${item.interest}</span> ${item.phone ? '• ' + item.phone : ''}
+                </div>
+              </div>
+            </div>
+            <div class="shrink-0">${waBtn}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCategoryBreakdown(logs) {
+      const container = document.getElementById('categoryBreakdown');
+      const counts = {};
+      let totalPositivePax = 0;
+
+      (logs || []).forEach(l => {
+        const p = parseInt(l.pax) || 0;
+        if (p > 0) {
+          const cat = l.interest || 'Singgah / Umum';
+          counts[cat] = (counts[cat] || 0) + p;
+          totalPositivePax += p;
+        }
+      });
+
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      if (entries.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Tiada data kategori lagi.</p>';
+        return;
+      }
+
+      container.innerHTML = entries.map(([cat, pax]) => {
+        const pct = totalPositivePax ? Math.round((pax / totalPositivePax) * 100) : 0;
+        return `
+          <div>
+            <div class="flex justify-between text-xs font-medium mb-1">
+              <span class="text-slate-700">${cat}</span>
+              <span class="text-emerald-700 font-bold">${pax} pax (${pct}%)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function exportCSV() {
+      const logs = getLocalLogs();
+      if (!logs.length) return showToast('Tiada data untuk dieksport');
+      const headers = ['Date','Time','Type','Pax','Name','Phone','Interest','Staff','Notes'];
+      const rows = logs.map(l => [l.date, l.time, l.type, l.pax, `"${l.name}"`, l.phone, `"${l.interest}"`, `"${l.staff}"`, `"${l.notes || ''}"`]);
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `kehadiran_jemaah_${getTodayStr()}.csv`;
+      a.click();
+    }
+  </script>
+</body>
+</html>
