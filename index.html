@@ -51,7 +51,7 @@
           <i class="fa-solid fa-clipboard-check"></i>
           <span>Jemaah</span>
         </button>
-        <button onclick="switchMode('staff')" id="btnModeStaff" class="px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1" title="Paparan Urusetia">
+        <button onclick="requestStaffAccess()" id="btnModeStaff" class="px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1" title="Paparan Urusetia">
           <i class="fa-solid fa-user-shield"></i>
         </button>
       </div>
@@ -277,10 +277,34 @@
 
   </main>
 
-  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
-    <i class="fa-solid fa-circle-check text-emerald-400"></i>
-    <span id="toastMsg">Disimpan!</span>
-  </div>
+  <!-- PIN Modal for Staff Access -->
+  <div id="pinModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 fade-in">
+    <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl border border-slate-100">
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
+      <i class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span id="toastMsg">Disimpan!</span>
+    </div>
+
+    <!-- Modal PIN Keselamatan Backend -->
+    <div id="pinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl space-y-4 text-center fade-in">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-xl">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-slate-800 text-base">Log Masuk Urusetia</h3>
+          <p class="text-xs text-slate-500 mt-1">Sila masukkan PIN keselamatan petugas untuk akses.</p>
+        </div>
+        <div>
+          <input type="password" id="adminPinInput" placeholder="Masukkan 4 digit PIN" maxlength="6"
+            class="w-full text-center py-3 text-lg font-bold tracking-widest bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-600 focus:outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="closePinModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">Batal</button>
+          <button onclick="verifyAdminPin()" id="btnVerify" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-md">Sahkan</button>
+        </div>
+      </div>
+    </div>
 
   <script>
     const LIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
@@ -299,8 +323,55 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('staffName').value = localStorage.getItem('booth_staff') || 'Ustaz Faris';
-      fetchStats();
+      // Semak jika sudah disahkan dalam sesi semasa
+      if (sessionStorage.getItem('azzuha_admin_auth') === 'true') {
+        // Biarkan sedia jika mahu kekal
+      }
     });
+
+    function requestStaffAccess() {
+      if (sessionStorage.getItem('azzuha_admin_auth') === 'true') {
+        switchMode('staff');
+        return;
+      }
+      document.getElementById('pinModal').classList.remove('hidden');
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('adminPinInput').focus();
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.add('hidden');
+    }
+
+    async function verifyAdminPin() {
+      const pin = document.getElementById('adminPinInput').value.trim();
+      if (!pin) return;
+
+      const btn = document.getElementById('btnVerify');
+      btn.textContent = 'Memeriksa...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${LIVE_SCRIPT_URL}?action=verifyPin&pin=${encodeURIComponent(pin)}`);
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+          sessionStorage.setItem('azzuha_admin_auth', 'true');
+          closePinModal();
+          switchMode('staff');
+          showToast('Akses Urusetia Dibenarkan');
+        } else {
+          showToast('PIN Keselamatan Salah!');
+          document.getElementById('adminPinInput').value = '';
+          document.getElementById('adminPinInput').focus();
+        }
+      } catch (err) {
+        showToast('Ralat menyemak PIN');
+      } finally {
+        btn.textContent = 'Sahkan';
+        btn.disabled = false;
+      }
+    }
 
     function switchMode(mode) {
       const isKiosk = mode === 'kiosk';
@@ -314,6 +385,40 @@
       document.getElementById('btnModeStaff').className = !isKiosk
         ? 'px-2.5 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1'
         : 'px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1';
+    }
+
+    function requestStaffAccess() {
+      // If already unlocked in session, switch directly
+      if (sessionStorage.getItem('staff_unlocked') === 'true') {
+        switchMode('staff');
+        return;
+      }
+      const modal = document.getElementById('pinModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('staffPinInput').value = '';
+      document.getElementById('staffPinInput').focus();
+    }
+
+    function closePinModal() {
+      const modal = document.getElementById('pinModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyStaffPin(e) {
+      e.preventDefault();
+      const pin = document.getElementById('staffPinInput').value.trim();
+      // Default PIN is 2026 (or you can change it here)
+      if (pin === '2026' || pin === '1234') {
+        sessionStorage.setItem('staff_unlocked', 'true');
+        closePinModal();
+        switchMode('staff');
+        showToast('Akses Urusetia Dibenarkan');
+      } else {
+        showToast('PIN Tidak Sah!');
+        document.getElementById('staffPinInput').value = '';
+      }
     }
 
     function adjustKioskPax(delta) {
