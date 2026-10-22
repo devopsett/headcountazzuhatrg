@@ -39,10 +39,9 @@
           <i class="fa-solid fa-kaaba text-lg"></i>
         </div>
         <div>
-          <h1 class="font-extrabold text-sm sm:text-base tracking-tight leading-snug text-white">Azzuha Group Travel & Tours</h1>
+          <h1 class="font-extrabold text-sm sm:text-base tracking-tight leading-snug text-white">Azzuha Terengganu</h1>
           <div class="flex items-center gap-1.5 mt-0.5">
-            <span id="statusDot" class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-            <p id="syncStatus" class="text-[11px] font-medium text-emerald-100/90">Menyambung ke Google Sheet...</p>
+            <p class="text-[11px] font-medium text-white tracking-wide">Menyantuni Dengan Hati</p>
           </div>
         </div>
       </div>
@@ -437,22 +436,12 @@
     }
 
     function setStatus(msg, mode = 'live') {
-      const el = document.getElementById('syncStatus');
-      const dot = document.getElementById('statusDot');
-      el.textContent = msg;
-      if (mode === 'live') {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-300';
-      } else if (mode === 'error') {
-        dot.className = 'w-2 h-2 rounded-full bg-rose-400';
-      } else {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-300';
-      }
+      // Keep silent status updates so the slogan remains visible in the header
     }
 
     async function fetchStats() {
       const icon = document.getElementById('refreshIcon');
       if (icon) icon.classList.add('fa-spin');
-      setStatus('Menyegerak Google Sheet...', 'live');
 
       try {
         const res = await fetch(LIVE_SCRIPT_URL);
@@ -460,10 +449,9 @@
         if (data.status === 'success') {
           cachedLogs = data.recentLogs || [];
           updateScoreboard(data.stats, cachedLogs);
-          setStatus('Google Sheet Aktif • ' + new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }), 'live');
         }
       } catch (err) {
-        setStatus('Gagal sambung ke Sheet (Semak Web App URL /exec)', 'error');
+        console.error('Fetch error:', err);
       } finally {
         if (icon) icon.classList.remove('fa-spin');
       }
@@ -500,7 +488,6 @@
       todayEl.textContent = parseInt(todayEl.textContent || 0) + record.pax;
       totalEl.textContent = parseInt(totalEl.textContent || 0) + record.pax;
 
-      setStatus('Menyimpan ke Google Sheet...', 'live');
       try {
         await fetch(LIVE_SCRIPT_URL, {
           method: 'POST',
@@ -511,7 +498,7 @@
         showToast('Berjaya disimpan ke Google Sheet!');
         setTimeout(fetchStats, 1000);
       } catch (err) {
-        setStatus('Ralat menyimpan ke Sheet!', 'error');
+        showToast('Ralat menyimpan ke Sheet!');
       }
     }
 
@@ -529,7 +516,7 @@
     function formatWhatsAppLink(phone, name, interest) {
       let clean = phone.replace(/\D/g, '');
       if (clean.startsWith('0')) clean = '6' + clean;
-      const text = encodeURIComponent(`Assalamualaikum ${name}, terima kasih kerana singgah & mendaftar di booth Azzuha Group Travel & Tours tadi berkenaan ${interest}. Jika ada sebarang soalan lanjut, boleh balas mesej ini ya.`);
+      const text = encodeURIComponent(`Assalamualaikum ${name}, terima kasih kerana singgah & mendaftar di booth Azzuha Terengganu tadi berkenaan ${interest}. Jika ada sebarang soalan lanjut, boleh balas mesej ini ya.`);
       return `https://wa.me/${clean}?text=${text}`;
     }
 
@@ -617,7 +604,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Azzuha_Kehadiran_${getTodayStr()}.csv`;
+      a.download = `Azzuha_Terengganu_Kehadiran_${getTodayStr()}.csv`;
       a.click();
     }
   </script>
