@@ -541,22 +541,23 @@
       }
 
       container.innerHTML = logs.map(item => {
-        const badgeColor = item.pax > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+        const badgeColor = item.pax > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-rose-50 text-rose-700 border border-rose-200/80';
         const paxSign = item.pax > 0 ? `+${item.pax}` : item.pax;
         const waBtn = item.phone ? `
           <a href="${formatWhatsAppLink(item.phone, item.name, item.interest)}" target="_blank"
-             class="text-emerald-700 hover:bg-emerald-100 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold inline-flex items-center gap-1 transition">
-            <i class="fa-brands fa-whatsapp text-sm"></i> WA
+             class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shrink-0">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span>WhatsApp</span>
           </a>` : '';
 
         return `
-          <div class="py-2.5 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <span class="${badgeColor} font-bold text-xs px-2.5 py-1 rounded-lg shrink-0 min-w-[36px] text-center">${paxSign}</span>
-              <div class="truncate">
-                <div class="font-semibold text-slate-800 truncate text-xs sm:text-sm">${item.name}</div>
-                <div class="text-[11px] text-slate-400 truncate">
-                  ${item.time} • <span class="text-slate-600 font-medium">${item.interest}</span> ${item.phone ? '• ' + item.phone : ''}
+          <div class="py-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="${badgeColor} font-extrabold text-xs px-2.5 py-1 rounded-xl shrink-0">${paxSign} Pax</span>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-800 text-xs sm:text-sm truncate">${item.name}</div>
+                <div class="text-[11px] text-slate-400 truncate mt-0.5">
+                  ${item.time} • <span class="font-semibold text-slate-600">${item.interest}</span> ${item.staff && item.staff !== '-' ? '• PIC: ' + item.staff : ''}
                 </div>
               </div>
             </div>
@@ -567,35 +568,36 @@
     }
 
     function renderCategoryBreakdown(logs) {
-      const container = document.getElementById('categoryBreakdown');
-      const counts = {};
-      let totalPositivePax = 0;
-
-      (logs || []).forEach(l => {
-        const p = parseInt(l.pax) || 0;
-        if (p > 0) {
-          const cat = l.interest || 'Umrah';
-          counts[cat] = (counts[cat] || 0) + p;
-          totalPositivePax += p;
+      const counts = { Umrah: 0, 'Haji (Rayuan)': 0, 'Haji (P1)': 0, 'Lain-lain': 0 };
+      logs.forEach(l => {
+        let cat = l.interest || 'Lain-lain';
+        if (counts[cat] !== undefined) {
+          counts[cat] += l.pax;
+        } else {
+          counts['Lain-lain'] += l.pax;
         }
       });
 
-      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-      if (entries.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">Tiada data kategori lagi.</p>';
-        return;
-      }
+      const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+      const container = document.getElementById('categoryBreakdown');
+      
+      const cats = [
+        { name: 'Umrah', count: counts['Umrah'], color: 'bg-emerald-600' },
+        { name: 'Haji (Rayuan)', count: counts['Haji (Rayuan)'], color: 'bg-teal-600' },
+        { name: 'Haji (P1)', count: counts['Haji (P1)'], color: 'bg-amber-500' },
+        { name: 'Lain-lain', count: counts['Lain-lain'], color: 'bg-slate-500' }
+      ];
 
-      container.innerHTML = entries.map(([cat, pax]) => {
-        const pct = totalPositivePax ? Math.round((pax / totalPositivePax) * 100) : 0;
+      container.innerHTML = cats.map(c => {
+        const pct = Math.round((c.count / total) * 100);
         return `
           <div>
-            <div class="flex justify-between text-xs font-medium mb-1">
-              <span class="text-slate-700">${cat}</span>
-              <span class="text-emerald-700 font-bold">${pax} pax (${pct}%)</span>
+            <div class="flex justify-between text-xs font-bold mb-1">
+              <span class="text-slate-700">${c.name}</span>
+              <span class="text-slate-500">${c.count} pax (${pct}%)</span>
             </div>
-            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
+            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full ${c.color} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
             </div>
           </div>
         `;
@@ -603,14 +605,19 @@
     }
 
     function exportCSV() {
-      if (!cachedLogs.length) return showToast('Tiada data untuk dieksport');
-      const headers = ['Date','Time','Type','Pax','Name','Phone','Interest','Staff','Notes'];
-      const rows = cachedLogs.map(l => [l.date, l.time, l.type, l.pax, `"${l.name}"`, l.phone, `"${l.interest}"`, `"${l.staff}"`, `"${l.notes || ''}"`]);
-      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
+      if (!cachedLogs || cachedLogs.length === 0) {
+        showToast('Tiada data untuk dieksport');
+        return;
+      }
+      let csv = 'Timestamp,Date,Time,Entry Type,Pax,Name,Phone,Interest,Staff,Notes\n';
+      cachedLogs.forEach(r => {
+        csv += `"${r.timestamp}","${r.date}","${r.time}","${r.type}",${r.pax},"${r.name}","${r.phone}","${r.interest}","${r.staff}","${r.notes}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `kehadiran_jemaah_${getTodayStr()}.csv`;
+      a.href = url;
+      a.download = `Azzuha_Kehadiran_${getTodayStr()}.csv`;
       a.click();
     }
   </script>
