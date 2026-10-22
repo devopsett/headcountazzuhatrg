@@ -1,713 +1,335 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azzuha Group Travel & Tours - Kehadiran</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    @keyframes pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.12); }
-      100% { transform: scale(1); }
-    }
-    .pop-anim {
-      animation: pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in {
-      animation: fadeIn 0.22s ease-out forwards;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azzuha Terengganu - Sistem Kehadiran Jemaah</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 pb-14 selection:bg-emerald-600 selection:text-white">
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800">
 
-  <header class="sticky top-0 z-30 backdrop-blur-md bg-emerald-900/90 border-b border-emerald-700/60 text-white shadow-sm">
-    <div class="max-w-md mx-auto px-4 py-3.5 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-emerald-950 flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
-          <i class="fa-solid fa-kaaba text-lg"></i>
-        </div>
-        <div>
-          <h1 class="font-extrabold text-sm sm:text-base tracking-tight leading-snug text-white">Azzuha Terengganu</h1>
-          <div class="flex items-center gap-1.5 mt-0.5">
-            <p class="text-[11px] font-medium text-white tracking-wide">Menyantuni Dengan Hati</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center bg-emerald-950/60 p-1 rounded-xl border border-emerald-700/50">
-        <button onclick="switchMode('kiosk')" id="btnModeKiosk" class="px-3 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-clipboard-check"></i>
-          <span>Jemaah</span>
-        </button>
-        <button onclick="requestStaffAccess()" id="btnModeStaff" class="px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1" title="Paparan Urusetia">
-          <i class="fa-solid fa-user-shield"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-md mx-auto px-4 pt-5 space-y-4">
-
-    <section id="mode-kiosk" class="space-y-4">
-      <div class="bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden relative">
-        <div class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 px-6 py-5 text-white relative overflow-hidden">
-          <div class="absolute -right-6 -bottom-6 text-white/10 text-8xl pointer-events-none">
-            <i class="fa-solid fa-mosque"></i>
-          </div>
-          <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider bg-white/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-amber-300 mb-1.5">
-            <i class="fa-solid fa-sparkles text-[10px]"></i> Buku Kehadiran Digital
-          </span>
-          <h2 class="text-xl font-extrabold tracking-tight">Daftar Kehadiran Jemaah</h2>
-          <p class="text-xs text-emerald-100/90 mt-0.5">Sila lengkapkan maklumat ringkas di bawah.</p>
-        </div>
-
-        <form id="kioskForm" onsubmit="submitKioskCheckIn(event)" class="p-6 space-y-5">
-          <div>
-            <label for="kName" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Nama Jemaah <span class="text-rose-500">*</span>
-            </label>
-            <div class="relative">
-              <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                <i class="fa-solid fa-user text-sm"></i>
-              </div>
-              <input type="text" id="kName" required placeholder="Contoh: Hj Ahmad bin Ali"
-                class="w-full pl-14 pr-4 py-3.5 text-base font-semibold text-slate-800 bg-slate-50/80 border-2 border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all placeholder:font-normal placeholder:text-slate-400" />
+    <!-- Header (Bergerak Ikut Skrol) -->
+    <header class="w-full bg-amber-600 shadow-md text-white py-4 px-6 flex justify-between items-center z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+                <i class="fa-solid fa-kaaba text-xl text-white"></i>
             </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <label for="kPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-500">
-                No. Telefon / WhatsApp
-              </label>
-              <span class="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Pilihan</span>
+            <div>
+                <h1 class="text-lg font-bold tracking-wide">Azzuha Terengganu</h1>
+                <p class="text-xs text-amber-100 font-medium tracking-wider">Menyantuni Dengan Hati</p>
             </div>
-            <div class="relative">
-              <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                <i class="fa-solid fa-phone text-sm"></i>
-              </div>
-              <input type="tel" id="kPhone" placeholder="Contoh: 0123456789"
-                class="w-full pl-14 pr-4 py-3.5 text-base font-semibold text-slate-800 bg-slate-50/80 border-2 border-slate-200 rounded-2xl focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all placeholder:font-normal placeholder:text-slate-400" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Bilangan Kehadiran (Pax)
-            </label>
-            <div class="flex items-center gap-2.5 bg-slate-50 p-2 rounded-2xl border-2 border-slate-200/80">
-              <button type="button" onclick="adjustKioskPax(-1)" 
-                class="w-12 h-12 rounded-xl bg-white hover:bg-slate-100 active:scale-95 text-slate-700 text-base font-bold flex items-center justify-center transition shadow-sm border border-slate-200/80">
-                <i class="fa-solid fa-minus"></i>
-              </button>
-              <div class="flex-1 text-center py-0.5">
-                <span id="kPaxDisplay" class="text-3xl font-extrabold text-emerald-700 leading-none inline-block">1</span>
-                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mt-0.5">Orang</span>
-                <input type="hidden" id="kPax" value="1" />
-              </div>
-              <button type="button" onclick="adjustKioskPax(1)" 
-                class="w-12 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-base font-bold flex items-center justify-center transition shadow-sm shadow-emerald-600/20">
-                <i class="fa-solid fa-plus"></i>
-              </button>
-            </div>
-            <div class="grid grid-cols-4 gap-2 mt-2">
-              <button type="button" onclick="setKioskPax(1)" data-pax-btn="1" class="pax-preset-btn py-2 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition">1 Pax</button>
-              <button type="button" onclick="setKioskPax(2)" data-pax-btn="2" class="pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition">2 Pax</button>
-              <button type="button" onclick="setKioskPax(4)" data-pax-btn="4" class="pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition">4 Pax</button>
-              <button type="button" onclick="setKioskPax(6)" data-pax-btn="6" class="pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition">6 Pax</button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Kategori Pilihan
-            </label>
-            <div class="grid grid-cols-3 gap-2.5" id="kioskInterestPills">
-              <button type="button" onclick="selectKioskInterest('Umrah')" data-val="Umrah"
-                class="k-interest-btn py-3 px-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-xs flex flex-col items-center justify-center gap-1.5 shadow-sm transition-all">
-                <i class="fa-solid fa-kaaba text-base text-emerald-600"></i>
-                <span>Umrah</span>
-              </button>
-              <button type="button" onclick="selectKioskInterest('Haji')" data-val="Haji"
-                class="k-interest-btn py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex flex-col items-center justify-center gap-1.5 transition-all">
-                <i class="fa-solid fa-mosque text-base text-slate-400"></i>
-                <span>Haji</span>
-              </button>
-              <button type="button" onclick="selectKioskInterest('Lain-lain')" data-val="Lain-lain"
-                class="k-interest-btn py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex flex-col items-center justify-center gap-1.5 transition-all">
-                <i class="fa-solid fa-compass text-base text-slate-400"></i>
-                <span>Lain-lain</span>
-              </button>
-            </div>
-
-            <div id="hajiSubOptions" class="hidden mt-3 p-3.5 bg-gradient-to-br from-emerald-50 to-teal-50/60 border-2 border-emerald-200/80 rounded-2xl fade-in">
-              <div class="flex items-center justify-between mb-2.5">
-                <label class="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
-                  <i class="fa-solid fa-sliders text-emerald-600"></i> Pilih Status Haji Anda:
-                </label>
-                <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-200/70 text-emerald-900 px-2 py-0.5 rounded-full">Wajib Pilih</span>
-              </div>
-              <div class="grid grid-cols-2 gap-2.5">
-                <button type="button" onclick="selectHajiType('Haji (Rayuan)')" data-haji="Haji (Rayuan)"
-                  class="haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-white text-emerald-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all">
-                  <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
-                  <span>Rayuan</span>
-                </button>
-                <button type="button" onclick="selectHajiType('Haji (P1)')" data-haji="Haji (P1)"
-                  class="haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-slate-200/90 bg-white/70 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 transition-all">
-                  <i class="fa-regular fa-circle text-slate-400 text-sm"></i>
-                  <span>P1 (Terpilih)</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2 text-base">
-            <i class="fa-solid fa-paper-plane"></i>
-            <span>Hantar Kehadiran</span>
-          </button>
-        </form>
-
-        <div id="thankYouOverlay" class="hidden absolute inset-0 bg-white/95 backdrop-blur-md p-6 flex-col items-center justify-center text-center z-20 fade-in">
-          <div class="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mb-4 shadow-inner">
-            <i class="fa-solid fa-check"></i>
-          </div>
-          <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full mb-2">Pendaftaran Berjaya</span>
-          <h3 class="text-2xl font-extrabold text-slate-800">Terima Kasih!</h3>
-          <p class="text-sm text-slate-500 mt-1.5">Rekod kehadiran telah berjaya disimpan ke sistem.</p>
-          <button onclick="closeThankYouOverlay()" class="mt-6 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md transition">
-            Daftar Jemaah Seterusnya
-          </button>
         </div>
-      </div>
-    </section>
-
-    <section id="mode-staff" class="hidden space-y-4">
-      <div class="bg-slate-900 text-white rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 min-w-0 flex-1">
-          <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-amber-400 shrink-0">
-            <i class="fa-solid fa-user-tie text-sm"></i>
-          </div>
-          <input id="staffName" type="text" placeholder="Nama Petugas (Cth: Ustaz Faris)" 
-            class="bg-slate-800/90 text-white text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-amber-400 w-full"
-            onchange="localStorage.setItem('booth_staff', this.value)" />
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleMode('kiosk')" id="btnKiosk" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white text-amber-700 shadow transition">Jemaah</button>
+            <button onclick="checkAdminAccess()" id="btnAdmin" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-amber-700/60 text-white hover:bg-amber-700 transition">Urusetia</button>
         </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button onclick="fetchStats()" class="p-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs border border-slate-700 transition flex items-center gap-1.5" title="Muat Semula">
-            <i id="refreshIcon" class="fa-solid fa-rotate"></i>
-            <span>Muat Semula</span>
-          </button>
-        </div>
-      </div>
+    </header>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 relative overflow-hidden">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Hari Ini</span>
-            <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-calendar-day"></i>
-            </span>
-          </div>
-          <div id="todayPax" class="text-4xl font-extrabold text-emerald-600 mt-2 leading-none">0</div>
-          <div class="text-xs text-slate-500 mt-2 font-medium"><span id="todayGroups" class="font-bold text-slate-700">0</span> pendaftaran</div>
-        </div>
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 relative overflow-hidden">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Keseluruhan</span>
-            <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-users"></i>
-            </span>
-          </div>
-          <div id="totalPax" class="text-4xl font-extrabold text-slate-800 mt-2 leading-none">0</div>
-          <div class="text-xs text-slate-500 mt-2 font-medium"><span id="totalGroups" class="font-bold text-slate-700">0</span> jumlah rekod</div>
-        </div>
-      </div>
+    <!-- Main Content -->
+    <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-6 pb-12">
 
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-bolt text-amber-500"></i> Kaunter Pantas Walk-In
-          </h2>
-          <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">Tanpa Nama</span>
-        </div>
-        <div class="grid grid-cols-4 gap-2">
-          <button onclick="quickCount(1)" class="bg-emerald-600 active:scale-95 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-sm shadow-sm transition">+1 Pax</button>
-          <button onclick="quickCount(2)" class="bg-emerald-600 active:scale-95 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-sm shadow-sm transition">+2 Pax</button>
-          <button onclick="quickCount(4)" class="bg-teal-600 active:scale-95 hover:bg-teal-700 text-white font-extrabold py-3 rounded-xl text-sm shadow-sm transition">+4 Pax</button>
-          <button onclick="quickCount(-1)" class="bg-rose-50 active:scale-95 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold py-3 rounded-xl text-sm transition">-1</button>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 space-y-3">
-        <div class="flex justify-between items-center">
-          <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-chart-pie text-emerald-600"></i> Pecahan Kategori Jemaah
-          </h2>
-          <button onclick="exportCSV()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
-            <i class="fa-solid fa-file-csv"></i> Eksport CSV
-          </button>
-        </div>
-        <div id="categoryBreakdown" class="space-y-2.5 pt-1"></div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-list-check text-emerald-600"></i> Senarai Kehadiran & WhatsApp
-          </h2>
-          <span id="logCountBadge" class="text-[11px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">0 rekod</span>
-        </div>
-        <div id="recentList" class="divide-y divide-slate-100 text-sm max-h-80 overflow-y-auto pr-1"></div>
-      </div>
-    </section>
-
-  </main>
-
-  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
-    <i class="fa-solid fa-circle-check text-emerald-400"></i>
-    <span id="toastMsg">Disimpan!</span>
-  </div>
-
-  <!-- Modal PIN Keselamatan Backend -->
-  <div id="pinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl space-y-4 text-center fade-in">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-xl">
-        <i class="fa-solid fa-lock"></i>
-      </div>
-      <div>
-        <h3 class="font-extrabold text-slate-800 text-base">Log Masuk Urusetia</h3>
-        <p class="text-xs text-slate-500 mt-1">Sila masukkan PIN keselamatan petugas untuk akses.</p>
-      </div>
-      <div>
-        <input type="password" id="adminPinInput" placeholder="Masukkan 4 digit PIN" maxlength="6"
-          class="w-full text-center py-3 text-lg font-bold tracking-widest bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-600 focus:outline-none" />
-      </div>
-      <div class="grid grid-cols-2 gap-2 pt-1">
-        <button onclick="closePinModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">Batal</button>
-        <button onclick="verifyAdminPin()" id="btnVerify" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-md">Sahkan</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const LIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
-    let selectedKioskInterest = 'Umrah';
-    let selectedHajiSubType = 'Haji (Rayuan)';
-    let thankYouTimer = null;
-    let cachedLogs = [];
-
-    function getTodayStr() {
-      return new Date().toISOString().split('T')[0];
-    }
-
-    function getTimeStr() {
-      return new Date().toTimeString().split(' ')[0];
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('staffName').value = localStorage.getItem('booth_staff') || 'Ustaz Faris';
-    });
-
-    function requestStaffAccess() {
-      if (sessionStorage.getItem('azzuha_admin_auth') === 'true') {
-        switchMode('staff');
-        return;
-      }
-      const modal = document.getElementById('pinModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.getElementById('adminPinInput').value = '';
-      document.getElementById('adminPinInput').focus();
-    }
-
-    function closePinModal() {
-      const modal = document.getElementById('pinModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    async function verifyAdminPin() {
-      const pin = document.getElementById('adminPinInput').value.trim();
-      if (!pin) return;
-
-      const btn = document.getElementById('btnVerify');
-      btn.textContent = 'Memeriksa...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${LIVE_SCRIPT_URL}?action=verifyPin&pin=${encodeURIComponent(pin)}`);
-        const data = await res.json();
-        
-        if (data.status === 'success') {
-          sessionStorage.setItem('azzuha_admin_auth', 'true');
-          closePinModal();
-          switchMode('staff');
-          showToast('Akses Urusetia Dibenarkan');
-          fetchStats();
-        } else {
-          showToast('PIN Keselamatan Salah!');
-          document.getElementById('adminPinInput').value = '';
-          document.getElementById('adminPinInput').focus();
-        }
-      } catch (err) {
-        showToast('Ralat menyemak PIN');
-      } finally {
-        btn.textContent = 'Sahkan';
-        btn.disabled = false;
-      }
-    }
-
-    function switchMode(mode) {
-      const isKiosk = mode === 'kiosk';
-      document.getElementById('mode-kiosk').classList.toggle('hidden', !isKiosk);
-      document.getElementById('mode-staff').classList.toggle('hidden', isKiosk);
-
-      document.getElementById('btnModeKiosk').className = isKiosk
-        ? 'px-3 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5'
-        : 'px-3 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1.5';
-
-      document.getElementById('btnModeStaff').className = !isKiosk
-        ? 'px-2.5 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1'
-        : 'px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1';
-    }
-
-    function requestStaffAccess() {
-      // If already unlocked in session, switch directly
-      if (sessionStorage.getItem('staff_unlocked') === 'true') {
-        switchMode('staff');
-        return;
-      }
-      const modal = document.getElementById('pinModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.getElementById('staffPinInput').value = '';
-      document.getElementById('staffPinInput').focus();
-    }
-
-    function closePinModal() {
-      const modal = document.getElementById('pinModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function verifyStaffPin(e) {
-      e.preventDefault();
-      const pin = document.getElementById('staffPinInput').value.trim();
-      // Default PIN is 2026 (or you can change it here)
-      if (pin === '2026' || pin === '1234') {
-        sessionStorage.setItem('staff_unlocked', 'true');
-        closePinModal();
-        switchMode('staff');
-        showToast('Akses Urusetia Dibenarkan');
-      } else {
-        showToast('PIN Tidak Sah!');
-        document.getElementById('staffPinInput').value = '';
-      }
-    }
-
-    function adjustKioskPax(delta) {
-      const input = document.getElementById('kPax');
-      let val = (parseInt(input.value) || 1) + delta;
-      if (val < 1) val = 1;
-      if (val > 50) val = 50;
-      setKioskPax(val);
-    }
-
-    function setKioskPax(val) {
-      document.getElementById('kPax').value = val;
-      const disp = document.getElementById('kPaxDisplay');
-      disp.textContent = val;
-      animateCounter('kPaxDisplay');
-
-      document.querySelectorAll('.pax-preset-btn').forEach(btn => {
-        if (parseInt(btn.dataset.paxBtn) === val) {
-          btn.className = 'pax-preset-btn py-2 text-xs font-bold rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 transition';
-        } else {
-          btn.className = 'pax-preset-btn py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-600 border border-transparent transition';
-        }
-      });
-    }
-
-    function selectKioskInterest(val) {
-      const hajiBox = document.getElementById('hajiSubOptions');
-      if (val === 'Haji') {
-        hajiBox.classList.remove('hidden');
-        selectedKioskInterest = selectedHajiSubType;
-      } else {
-        hajiBox.classList.add('hidden');
-        selectedKioskInterest = val;
-      }
-
-      document.querySelectorAll('.k-interest-btn').forEach(btn => {
-        const icon = btn.querySelector('i');
-        if (btn.dataset.val === val) {
-          btn.className = 'k-interest-btn py-3 px-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-xs flex flex-col items-center justify-center gap-1.5 shadow-sm transition-all';
-          if (icon) {
-            icon.classList.remove('text-slate-400');
-            icon.classList.add('text-emerald-600');
-          }
-        } else {
-          btn.className = 'k-interest-btn py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex flex-col items-center justify-center gap-1.5 transition-all';
-          if (icon) {
-            icon.classList.remove('text-emerald-600');
-            icon.classList.add('text-slate-400');
-          }
-        }
-      });
-    }
-
-    function selectHajiType(subVal) {
-      selectedHajiSubType = subVal;
-      selectedKioskInterest = subVal;
-      document.querySelectorAll('.haji-sub-btn').forEach(btn => {
-        const icon = btn.querySelector('i');
-        if (btn.dataset.haji === subVal) {
-          btn.className = 'haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-white text-emerald-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all';
-          if (icon) icon.className = 'fa-solid fa-circle-check text-emerald-600 text-sm';
-        } else {
-          btn.className = 'haji-sub-btn py-2.5 px-3 rounded-xl border-2 border-slate-200/90 bg-white/70 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 transition-all';
-          if (icon) icon.className = 'fa-regular fa-circle text-slate-400 text-sm';
-        }
-      });
-    }
-
-    function submitKioskCheckIn(e) {
-      e.preventDefault();
-      const name = document.getElementById('kName').value.trim();
-      const pax = parseInt(document.getElementById('kPax').value) || 1;
-      const phone = document.getElementById('kPhone').value.trim();
-      const staff = document.getElementById('staffName').value.trim() || 'Kiosk Self-CheckIn';
-
-      if (!name) return;
-
-      sendPayload({
-        type: 'Self Check-In',
-        name: name,
-        pax: pax,
-        phone: phone,
-        interest: selectedKioskInterest,
-        staff: staff,
-        notes: ''
-      });
-
-      const overlay = document.getElementById('thankYouOverlay');
-      overlay.classList.remove('hidden');
-      overlay.classList.add('flex');
-
-      document.getElementById('kName').value = '';
-      document.getElementById('kPhone').value = '';
-      setKioskPax(1);
-
-      if (thankYouTimer) clearTimeout(thankYouTimer);
-      thankYouTimer = setTimeout(closeThankYouOverlay, 3200);
-    }
-
-    function closeThankYouOverlay() {
-      const overlay = document.getElementById('thankYouOverlay');
-      overlay.classList.add('hidden');
-      overlay.classList.remove('flex');
-      document.getElementById('kName').focus();
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      document.getElementById('toastMsg').textContent = msg;
-      t.classList.remove('opacity-0');
-      setTimeout(() => t.classList.add('opacity-0'), 1800);
-    }
-
-    function animateCounter(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.remove('pop-anim');
-      void el.offsetWidth;
-      el.classList.add('pop-anim');
-    }
-
-    function setStatus(msg, mode = 'live') {
-      // Keep silent status updates so the slogan remains visible in the header
-    }
-
-    async function fetchStats() {
-      const icon = document.getElementById('refreshIcon');
-      if (icon) icon.classList.add('fa-spin');
-
-      try {
-        const res = await fetch(LIVE_SCRIPT_URL);
-        const data = await res.json();
-        if (data.status === 'success') {
-          cachedLogs = data.recentLogs || [];
-          updateScoreboard(data.stats, cachedLogs);
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
-      } finally {
-        if (icon) icon.classList.remove('fa-spin');
-      }
-    }
-
-    function updateScoreboard(stats, logs) {
-      document.getElementById('todayPax').textContent = stats.todayPax;
-      document.getElementById('totalPax').textContent = stats.totalPax;
-      document.getElementById('todayGroups').textContent = stats.todayGroups;
-      document.getElementById('totalGroups').textContent = stats.totalGroups;
-      document.getElementById('logCountBadge').textContent = `${logs.length} rekod`;
-      renderRecentLogs(logs);
-      renderCategoryBreakdown(logs);
-    }
-
-    async function sendPayload(payload) {
-      const record = {
-        date: getTodayStr(),
-        time: getTimeStr(),
-        type: payload.type || 'Self Check-In',
-        pax: parseInt(payload.pax) || 1,
-        name: payload.name || 'Tetamu Jemaah',
-        phone: payload.phone || '',
-        interest: payload.interest || 'Umrah',
-        staff: payload.staff || '',
-        notes: payload.notes || ''
-      };
-
-      animateCounter('todayPax');
-      animateCounter('totalPax');
-
-      const todayEl = document.getElementById('todayPax');
-      const totalEl = document.getElementById('totalPax');
-      todayEl.textContent = parseInt(todayEl.textContent || 0) + record.pax;
-      totalEl.textContent = parseInt(totalEl.textContent || 0) + record.pax;
-
-      try {
-        await fetch(LIVE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(record)
-        });
-        showToast('Berjaya disimpan ke Google Sheet!');
-        setTimeout(fetchStats, 1000);
-      } catch (err) {
-        showToast('Ralat menyimpan ke Sheet!');
-      }
-    }
-
-    function quickCount(paxAmount) {
-      const staff = document.getElementById('staffName').value.trim();
-      sendPayload({
-        type: 'Quick Walk-in',
-        pax: paxAmount,
-        name: 'Walk-in Jemaah',
-        interest: 'Lain-lain',
-        staff: staff
-      });
-    }
-
-    function formatWhatsAppLink(phone, name, interest) {
-      let clean = phone.replace(/\D/g, '');
-      if (clean.startsWith('0')) clean = '6' + clean;
-      const text = encodeURIComponent(`Assalamualaikum ${name}, terima kasih kerana singgah & mendaftar di booth Azzuha Terengganu tadi berkenaan ${interest}. Jika ada sebarang soalan lanjut, boleh balas mesej ini ya.`);
-      return `https://wa.me/${clean}?text=${text}`;
-    }
-
-    function renderRecentLogs(logs) {
-      const container = document.getElementById('recentList');
-      if (!logs || logs.length === 0) {
-        container.innerHTML = '<p class="text-slate-400 text-xs text-center py-6">Tiada rekod kehadiran lagi.</p>';
-        return;
-      }
-
-      container.innerHTML = logs.map(item => {
-        const badgeColor = item.pax > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-rose-50 text-rose-700 border border-rose-200/80';
-        const paxSign = item.pax > 0 ? `+${item.pax}` : item.pax;
-        const waBtn = item.phone ? `
-          <a href="${formatWhatsAppLink(item.phone, item.name, item.interest)}" target="_blank"
-             class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shrink-0">
-            <i class="fa-brands fa-whatsapp text-sm"></i>
-            <span>WhatsApp</span>
-          </a>` : '';
-
-        return `
-          <div class="py-3 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-3 min-w-0">
-              <span class="${badgeColor} font-extrabold text-xs px-2.5 py-1 rounded-xl shrink-0">${paxSign} Pax</span>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-800 text-xs sm:text-sm truncate">${item.name}</div>
-                <div class="text-[11px] text-slate-400 truncate mt-0.5">
-                  ${item.time} • <span class="font-semibold text-slate-600">${item.interest}</span> ${item.staff && item.staff !== '-' ? '• PIC: ' + item.staff : ''}
+        <!-- KIOSK VIEW -->
+        <div id="kioskView" class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-900">Daftar Kehadiran Jemaah</h2>
+                    <p class="text-sm text-slate-500 mt-1">Sila lengkapkan maklumat kehadiran anda di booth</p>
                 </div>
-              </div>
-            </div>
-            <div class="shrink-0">${waBtn}</div>
-          </div>
-        `;
-      }).join('');
-    }
 
-    function renderCategoryBreakdown(logs) {
-      const counts = { Umrah: 0, 'Haji (Rayuan)': 0, 'Haji (P1)': 0, 'Lain-lain': 0 };
-      logs.forEach(l => {
-        let cat = l.interest || 'Lain-lain';
-        if (counts[cat] !== undefined) {
-          counts[cat] += l.pax;
-        } else {
-          counts['Lain-lain'] += l.pax;
+                <form id="attendanceForm" onsubmit="handleSubmit(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nama Penuh (Seperti dalam IC/Pasport)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-user text-sm"></i></span>
+                            <input type="text" id="fullName" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" placeholder="Cth: Ahmad bin Abu">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombor Telefon</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-phone text-sm"></i></span>
+                                <input type="tel" id="phoneNumber" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" placeholder="Cth: 0123456789">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Kategori</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-tag text-sm"></i></span>
+                                <select id="category" onchange="handleCategoryChange()" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition appearance-none">
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Umrah">Umrah</option>
+                                    <option value="Haji (Rayuan/P1)">Haji (Rayuan/P1)</option>
+                                    <option value="Lain-lain">Lain-lain</option>
+                                </select>
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400"><i class="fa-solid fa-chevron-down text-xs"></i></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="subCategoryWrapper" class="hidden">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Sub-Kategori Haji</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-list text-sm"></i></span>
+                            <select id="subCategory" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition appearance-none">
+                                <option value="">Pilih Status Haji</option>
+                                <option value="Rayuan">Rayuan</option>
+                                <option value="P1">P1</option>
+                            </select>
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400"><i class="fa-solid fa-chevron-down text-xs"></i></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg shadow-amber-600/20 transition duration-200 flex items-center justify-center space-x-2">
+                        <span>Hantar Kehadiran</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- WhatsApp Success Box (Hidden by default) -->
+            <div id="whatsappCard" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-4">
+                <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-xl shadow-md">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-emerald-900">Kehadiran Berjaya Direkod!</h3>
+                    <p class="text-xs text-emerald-700 mt-1">Sila klik butang di bawah untuk berhubung terus dengan wakil Azzuha Terengganu melalui WhatsApp.</p>
+                </div>
+                <a id="whatsappLink" href="#" target="_blank" class="block w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition text-sm text-center">
+                    <i class="fa-brands fa-whatsapp mr-2"></i> Teruskan ke WhatsApp
+                </a>
+                <button onclick="resetForm()" class="text-xs text-slate-500 hover:text-slate-700 font-medium underline">Daftar Jemaah Seterusnya</button>
+            </div>
+        </div>
+
+        <!-- ADMIN VIEW (Protected) -->
+        <div id="adminView" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Panel Urusetia</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Senarai kehadiran terkini jemaah di booth</p>
+                </div>
+                <button onclick="loadAdminData()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                    <span>Muat Semula</span>
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="py-3 px-4">Masa</th>
+                                <th class="py-3 px-4">Nama Jemaah</th>
+                                <th class="py-3 px-4">Telefon</th>
+                                <th class="py-3 px-4">Kategori</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+                            <tr>
+                                <td colspan="4" class="text-center py-8 text-slate-400">Memuatkan data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PIN Modal -->
+    <div id="pinModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-lg mb-2">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Akses Urusetia</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Masukkan PIN keselamatan untuk meneruskan</p>
+            </div>
+            <input type="password" id="adminPinInput" class="w-full text-center tracking-widest text-lg py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-amber-500 outline-none" placeholder="••••" maxlength="6">
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closePinModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">Batal</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition">Sahkan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN GOOGLE APPS SCRIPT URL ANDA DI SINI
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec";
+
+        function toggleMode(mode) {
+            const kioskView = document.getElementById('kioskView');
+            const adminView = document.getElementById('adminView');
+            const btnKiosk = document.getElementById('btnKiosk');
+            const btnAdmin = document.getElementById('btnAdmin');
+
+            if (mode === 'kiosk') {
+                kioskView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                btnKiosk.className = "px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white text-amber-700 shadow transition";
+                btnAdmin.className = "px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-amber-700/60 text-white hover:bg-amber-700 transition";
+            }
         }
-      });
 
-      const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
-      const container = document.getElementById('categoryBreakdown');
-      
-      const cats = [
-        { name: 'Umrah', count: counts['Umrah'], color: 'bg-emerald-600' },
-        { name: 'Haji (Rayuan)', count: counts['Haji (Rayuan)'], color: 'bg-teal-600' },
-        { name: 'Haji (P1)', count: counts['Haji (P1)'], color: 'bg-amber-500' },
-        { name: 'Lain-lain', count: counts['Lain-lain'], color: 'bg-slate-500' }
-      ];
+        function checkAdminAccess() {
+            document.getElementById('pinModal').classList.remove('hidden');
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('adminPinInput').focus();
+        }
 
-      container.innerHTML = cats.map(c => {
-        const pct = Math.round((c.count / total) * 100);
-        return `
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1">
-              <span class="text-slate-700">${c.name}</span>
-              <span class="text-slate-500">${c.count} pax (${pct}%)</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full ${c.color} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+        function closePinModal() {
+            document.getElementById('pinModal').classList.add('hidden');
+        }
 
-    function exportCSV() {
-      if (!cachedLogs || cachedLogs.length === 0) {
-        showToast('Tiada data untuk dieksport');
-        return;
-      }
-      let csv = 'Timestamp,Date,Time,Entry Type,Pax,Name,Phone,Interest,Staff,Notes\n';
-      cachedLogs.forEach(r => {
-        csv += `"${r.timestamp}","${r.date}","${r.time}","${r.type}",${r.pax},"${r.name}","${r.phone}","${r.interest}","${r.staff}","${r.notes}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Azzuha_Terengganu_Kehadiran_${getTodayStr()}.csv`;
-      a.click();
-    }
-  </script>
+        function verifyAdminPin() {
+            const pin = document.getElementById('adminPinInput').value;
+            if(!pin) return;
+
+            const submitBtn = document.querySelector('#pinModal button:last-child');
+            submitBtn.textContent = "Menyemak...";
+
+            fetch(SCRIPT_URL + "?action=verifyPin&pin=" + encodeURIComponent(pin))
+                .then(res => res.json())
+                .then(data => {
+                    submitBtn.textContent = "Sahkan";
+                    if (data.success) {
+                        closePinModal();
+                        openAdminPanel();
+                    } else {
+                        alert("PIN Keselamatan Salah!");
+                        document.getElementById('adminPinInput').value = '';
+                    }
+                })
+                .catch(err => {
+                    submitBtn.textContent = "Sahkan";
+                    alert("Ralat sambungan ke pelayan.");
+                });
+        }
+
+        function openAdminPanel() {
+            const kioskView = document.getElementById('kioskView');
+            const adminView = document.getElementById('adminView');
+            const btnKiosk = document.getElementById('btnKiosk');
+            const btnAdmin = document.getElementById('btnAdmin');
+
+            kioskView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            btnAdmin.className = "px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white text-amber-700 shadow transition";
+            btnKiosk.className = "px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-amber-700/60 text-white hover:bg-amber-700 transition";
+
+            loadAdminData();
+        }
+
+        function handleCategoryChange() {
+            const cat = document.getElementById('category').value;
+            const subWrapper = document.getElementById('subCategoryWrapper');
+            const subSelect = document.getElementById('subCategory');
+
+            if (cat === 'Haji (Rayuan/P1)') {
+                subWrapper.classList.remove('hidden');
+                subSelect.required = true;
+            } else {
+                subWrapper.classList.add('hidden');
+                subSelect.required = false;
+                subSelect.value = '';
+            }
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const category = document.getElementById('category').value;
+            const subCategory = document.getElementById('subCategory').value;
+            
+            const finalCategory = subCategory ? `${category} (${subCategory})` : category;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-sm"></i><span>Menyimpan...</span>';
+
+            const payload = {
+                fullName: fullName,
+                phoneNumber: phoneNumber,
+                category: finalCategory
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Hantar Kehadiran</span><i class="fa-solid fa-arrow-right text-xs"></i>';
+                
+                // Paparkan WhatsApp link tanpa popup alert
+                document.getElementById('attendanceForm').reset();
+                document.getElementById('subCategoryWrapper').classList.add('hidden');
+                document.getElementById('attendanceForm').parentElement.classList.add('hidden');
+                
+                const whatsappCard = document.getElementById('whatsappCard');
+                whatsappCard.classList.remove('hidden');
+
+                const waMessage = encodeURIComponent(`As-salamu 'alaykum / Salam sejahtera ${fullName}, terima kasih kerana melawat booth Azzuha Terengganu. Kami sedia membantu urusan umrah & haji anda.`);
+                document.getElementById('whatsappLink').href = `https://wa.me/60199881234?text=${waMessage}`;
+            })
+            .catch(err => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Hantar Kehadiran</span><i class="fa-solid fa-arrow-right text-xs"></i>';
+                alert("Gagal sambung ke Sheet (Semak Deployment URL)");
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('whatsappCard').classList.add('hidden');
+            document.getElementById('attendanceForm').parentElement.classList.remove('hidden');
+        }
+
+        function loadAdminData() {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner animate-spin mr-2"></i> Memuatkan data...</td></tr>`;
+
+            fetch(SCRIPT_URL + "?action=getData")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-400">Tiada rekod kehadiran dijumpai.</td></tr>`;
+                        return;
+                    }
+
+                    let html = '';
+                    data.reverse().forEach(row => {
+                        html += `
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="py-3 px-4 font-mono text-slate-500">${row.timestamp || '-'}</td>
+                                <td class="py-3 px-4 font-bold text-slate-900">${row.fullName || '-'}</td>
+                                <td class="py-3 px-4 text-slate-600">${row.phoneNumber || '-'}</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
+                                        ${row.category || '-'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                })
+                .catch(err => {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500 font-medium">Gagal memuatkan data dari Google Sheet.</td></tr>`;
+                });
+        }
+    </script>
 </body>
 </html>
