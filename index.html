@@ -174,14 +174,6 @@
             </div>
           </div>
 
-          <div class="pt-1">
-            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99] text-white font-extrabold py-4 rounded-2xl text-base shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2.5">
-              <span>Hantar Kehadiran</span>
-              <i class="fa-solid fa-arrow-right text-sm"></i>
-            </button>
-          </div>
-        </form>
-
         <div id="thankYouOverlay" class="hidden absolute inset-0 bg-white/95 backdrop-blur-md p-6 flex-col items-center justify-center text-center z-20 fade-in">
           <div class="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl mb-4 shadow-inner">
             <i class="fa-solid fa-check"></i>
@@ -277,34 +269,31 @@
 
   </main>
 
-  <!-- PIN Modal for Staff Access -->
-  <div id="pinModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50 fade-in">
-    <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl border border-slate-100">
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
-      <i class="fa-solid fa-circle-check text-emerald-400"></i>
-      <span id="toastMsg">Disimpan!</span>
-    </div>
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg">Disimpan!</span>
+  </div>
 
-    <!-- Modal PIN Keselamatan Backend -->
-    <div id="pinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl space-y-4 text-center fade-in">
-        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-xl">
-          <i class="fa-solid fa-lock"></i>
-        </div>
-        <div>
-          <h3 class="font-extrabold text-slate-800 text-base">Log Masuk Urusetia</h3>
-          <p class="text-xs text-slate-500 mt-1">Sila masukkan PIN keselamatan petugas untuk akses.</p>
-        </div>
-        <div>
-          <input type="password" id="adminPinInput" placeholder="Masukkan 4 digit PIN" maxlength="6"
-            class="w-full text-center py-3 text-lg font-bold tracking-widest bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-600 focus:outline-none" />
-        </div>
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <button onclick="closePinModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">Batal</button>
-          <button onclick="verifyAdminPin()" id="btnVerify" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-md">Sahkan</button>
-        </div>
+  <!-- Modal PIN Keselamatan Backend -->
+  <div id="pinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl space-y-4 text-center fade-in">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-xl">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <div>
+        <h3 class="font-extrabold text-slate-800 text-base">Log Masuk Urusetia</h3>
+        <p class="text-xs text-slate-500 mt-1">Sila masukkan PIN keselamatan petugas untuk akses.</p>
+      </div>
+      <div>
+        <input type="password" id="adminPinInput" placeholder="Masukkan 4 digit PIN" maxlength="6"
+          class="w-full text-center py-3 text-lg font-bold tracking-widest bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-600 focus:outline-none" />
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="closePinModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">Batal</button>
+        <button onclick="verifyAdminPin()" id="btnVerify" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-md">Sahkan</button>
       </div>
     </div>
+  </div>
 
   <script>
     const LIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
@@ -323,10 +312,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('staffName').value = localStorage.getItem('booth_staff') || 'Ustaz Faris';
-      // Semak jika sudah disahkan dalam sesi semasa
-      if (sessionStorage.getItem('azzuha_admin_auth') === 'true') {
-        // Biarkan sedia jika mahu kekal
-      }
     });
 
     function requestStaffAccess() {
@@ -334,13 +319,17 @@
         switchMode('staff');
         return;
       }
-      document.getElementById('pinModal').classList.remove('hidden');
+      const modal = document.getElementById('pinModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
       document.getElementById('adminPinInput').value = '';
       document.getElementById('adminPinInput').focus();
     }
 
     function closePinModal() {
-      document.getElementById('pinModal').classList.add('hidden');
+      const modal = document.getElementById('pinModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
 
     async function verifyAdminPin() {
@@ -360,6 +349,7 @@
           closePinModal();
           switchMode('staff');
           showToast('Akses Urusetia Dibenarkan');
+          fetchStats();
         } else {
           showToast('PIN Keselamatan Salah!');
           document.getElementById('adminPinInput').value = '';
