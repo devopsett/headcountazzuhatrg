@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azzuha Group Travel & Tours - Kehadiran</title>
+  <title>Azzuha Terengganu - Kehadiran</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,8 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 pb-14 selection:bg-emerald-600 selection:text-white">
 
-  <header class="w-full z-30 bg-emerald-900 border-b border-emerald-700/60 text-white shadow-sm">
+  <!-- Header (Bergerak bersama halaman apabila discroll) -->
+  <header class="w-full bg-emerald-900 border-b border-emerald-700/60 text-white shadow-sm">
     <div class="max-w-md mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-emerald-950 flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
@@ -60,6 +61,7 @@
 
   <main class="max-w-md mx-auto px-4 pt-5 space-y-4">
 
+    <!-- KIOSK MODE -->
     <section id="mode-kiosk" class="space-y-4">
       <div class="bg-white rounded-3xl shadow-xl border border-slate-200/90 overflow-hidden relative">
         <div class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 px-6 py-5 text-white relative overflow-hidden">
@@ -194,6 +196,7 @@
       </div>
     </section>
 
+    <!-- STAFF MODE -->
     <section id="mode-staff" class="hidden space-y-4">
       <div class="bg-slate-900 text-white rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -275,11 +278,6 @@
 
   </main>
 
-  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50 flex items-center gap-2">
-    <i class="fa-solid fa-circle-check text-emerald-400"></i>
-    <span id="toastMsg">Disimpan!</span>
-  </div>
-
   <!-- Modal PIN Keselamatan Backend -->
   <div id="pinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl space-y-4 text-center fade-in">
@@ -318,6 +316,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('staffName').value = localStorage.getItem('booth_staff') || 'Ustaz Faris';
+      fetchStats();
     });
 
     function requestStaffAccess() {
@@ -354,15 +353,14 @@
           sessionStorage.setItem('azzuha_admin_auth', 'true');
           closePinModal();
           switchMode('staff');
-          showToast('Akses Urusetia Dibenarkan');
           fetchStats();
         } else {
-          showToast('PIN Keselamatan Salah!');
+          alert('PIN Keselamatan Salah!');
           document.getElementById('adminPinInput').value = '';
           document.getElementById('adminPinInput').focus();
         }
       } catch (err) {
-        showToast('Ralat menyemak PIN');
+        alert('Ralat menyemak PIN');
       } finally {
         btn.textContent = 'Sahkan';
         btn.disabled = false;
@@ -381,40 +379,6 @@
       document.getElementById('btnModeStaff').className = !isKiosk
         ? 'px-2.5 py-1.5 rounded-lg bg-amber-400 text-emerald-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1'
         : 'px-2.5 py-1.5 rounded-lg text-emerald-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1';
-    }
-
-    function requestStaffAccess() {
-      // If already unlocked in session, switch directly
-      if (sessionStorage.getItem('staff_unlocked') === 'true') {
-        switchMode('staff');
-        return;
-      }
-      const modal = document.getElementById('pinModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.getElementById('staffPinInput').value = '';
-      document.getElementById('staffPinInput').focus();
-    }
-
-    function closePinModal() {
-      const modal = document.getElementById('pinModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function verifyStaffPin(e) {
-      e.preventDefault();
-      const pin = document.getElementById('staffPinInput').value.trim();
-      // Default PIN is 2026 (or you can change it here)
-      if (pin === '2026' || pin === '1234') {
-        sessionStorage.setItem('staff_unlocked', 'true');
-        closePinModal();
-        switchMode('staff');
-        showToast('Akses Urusetia Dibenarkan');
-      } else {
-        showToast('PIN Tidak Sah!');
-        document.getElementById('staffPinInput').value = '';
-      }
     }
 
     function adjustKioskPax(delta) {
@@ -521,10 +485,6 @@
       document.getElementById('kName').focus();
     }
 
-    function showToast(msg) {
-      // Disabled as requested
-    }
-
     function animateCounter(id) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -574,7 +534,6 @@
         notes: payload.notes || ''
       };
 
-      // Instantly increment local scoreboard values for immediate feedback
       const todayEl = document.getElementById('todayPax');
       const totalEl = document.getElementById('totalPax');
       const todayGroupsEl = document.getElementById('todayGroups');
@@ -602,7 +561,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(record)
         });
-        setTimeout(fetchStats, 1000);
+        setTimeout(fetchStats, 1200);
       } catch (err) {
         console.error('Save error:', err);
       }
@@ -622,8 +581,34 @@
     function formatWhatsAppLink(phone, name, interest) {
       let clean = phone.replace(/\D/g, '');
       if (clean.startsWith('0')) clean = '6' + clean;
-      const text = encodeURIComponent(`Assalamualaikum ${name}, terima kasih kerana singgah & mendaftar di booth Azzuha Terengganu tadi berkenaan ${interest}. Jika ada sebarang soalan lanjut, boleh balas mesej ini ya.`);
-      return `https://wa.me/${clean}?text=${text}`;
+      
+      const visitorName = name || 'Jemaah';
+      let msg = '';
+      
+      // Tentukan ayat mengikut kategori yang diminta
+      if (interest === 'Lain-lain') {
+        msg = `Assalamualaikum Tuan/Puan ${visitorName}, terima kasih kerana singgah ke booth Azzuha Group Travel & Tours. Semoga dipermudahkan urusan. Boleh hubungi kami semula jika ada sebarang pertanyaan ya. `;
+      } else {
+        let topic = 'Umrah';
+        if (interest === 'Haji (P1)') {
+          topic = 'Haji';
+        } else if (interest === 'Haji (Rayuan)') {
+          topic = 'Rayuan Haji';
+        } else if (interest === 'Umrah') {
+          topic = 'Umrah';
+        } else {
+          topic = interest;
+        }
+
+        msg = `Assalamualaikum Tuan/Puan ${visitorName}, terima kasih kerana singgah ke booth Azzuha Group Travel & Tours. Semoga dipermudahkan urusan. Boleh hubungi kami semula jika ada sebarang pertanyaan berkenaan ${topic}. `;
+      }
+
+      // Encode mesej teks asas dahulu
+      const encodedMsg = encodeURIComponent(msg);
+      
+      // Tambahkan hex encoded emoji 😊 (%F0%9F%98%8A) secara manual di hujung link URL
+      // Kaedah api.whatsapp.com/send lebih stabil untuk parsing percent-encoding pada semua browser & mobile
+      return `https://api.whatsapp.com/send?phone=${clean}&text=${encodedMsg}%F0%9F%98%8A`;
     }
 
     function renderRecentLogs(logs) {
@@ -699,7 +684,7 @@
 
     function exportCSV() {
       if (!cachedLogs || cachedLogs.length === 0) {
-        showToast('Tiada data untuk dieksport');
+        alert('Tiada data untuk dieksport');
         return;
       }
       let csv = 'Timestamp,Date,Time,Entry Type,Pax,Name,Phone,Interest,Staff,Notes\n';
