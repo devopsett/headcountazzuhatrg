@@ -533,11 +533,11 @@
         alert('Tiada data untuk dieksport bagi tapisan ini');
         return;
       }
-      let csv = 'Timestamp,Date,Time,Session,Entry Type,Pax,Name,Phone,Interest,Staff,Notes\n';
+      let csv = 'Timestamp,Date,Time,Session,Name,Phone,Interest,Staff,Notes\n';
       logsToExport.forEach(r => {
         const sess = getSessionFromTime(r.time, r.date);
         const sessName = sess === 'pagi' ? 'Sesi Pagi (10AM-3PM)' : (sess === 'petang' ? 'Sesi Petang (3PM-10PM)' : 'Lain-lain');
-        csv += `"${r.timestamp}","${r.date}","${r.time}","${sessName}","${r.type}",${r.pax || 1},"${r.name}","${r.phone}","${r.interest}","${r.staff}","${r.notes}"\n`;
+        csv += `"${r.timestamp}","${r.date}","${r.time}","${sessName}","${r.name}","${r.phone}","${r.interest}","${r.staff}","${r.notes}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
