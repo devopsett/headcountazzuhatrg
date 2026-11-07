@@ -75,12 +75,16 @@
           <i class="fa-regular fa-calendar-days text-emerald-600"></i> Pilihan Hari
         </span>
         <span id="activeDateLabel" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-          Hari 1 (06/11)
+          Semua Hari
         </span>
       </div>
       <div class="grid grid-cols-4 gap-1">
-        <button type="button" onclick="setDateFilter('day1')" id="btnDay1"
+        <button type="button" onclick="setDateFilter('all')" id="btnDayAll"
           class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm">
+          Semua
+        </button>
+        <button type="button" onclick="setDateFilter('day1')" id="btnDay1"
+          class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
           Hari 1
         </button>
         <button type="button" onclick="setDateFilter('day2')" id="btnDay2"
@@ -91,28 +95,24 @@
           class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
           Hari 3
         </button>
-        <button type="button" onclick="setDateFilter('all')" id="btnDayAll"
-          class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
-          Semua
-        </button>
       </div>
     </div>
 
     <!-- Penapis Sesi (Pagi / Petang / Semua) -->
     <div class="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200 grid grid-cols-3 gap-1">
       <button type="button" onclick="setSessionFilter('all')" id="btnSessionAll"
-        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
+        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm">
         Semua Sesi
       </button>
       <button type="button" onclick="setSessionFilter('pagi')" id="btnSessionPagi"
-        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm flex items-center justify-center gap-1">
+        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600 flex items-center justify-center gap-1">
         <i class="fa-solid fa-sun text-[11px]"></i>
-        <span>Pagi <span class="hidden sm:inline text-[10px] font-normal">(10AM-3PM)</span></span>
+        <span>Pagi</span>
       </button>
       <button type="button" onclick="setSessionFilter('petang')" id="btnSessionPetang"
         class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600 flex items-center justify-center gap-1">
         <i class="fa-solid fa-moon text-[11px]"></i>
-        <span>Petang <span class="hidden sm:inline text-[10px] font-normal">(3PM-10PM)</span></span>
+        <span>Petang</span>
       </button>
     </div>
 
@@ -175,8 +175,8 @@
   <script>
     const LIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
     let cachedLogs = [];
-    let currentSessionFilter = 'pagi';
-    let currentDateFilter = 'day1';
+    let currentSessionFilter = 'all';
+    let currentDateFilter = 'all';
 
     const EVENT_DAYS = {
       day1: '2026-11-06',
@@ -238,33 +238,46 @@
     }
 
     function initDashboard() {
-      currentSessionFilter = detectCurrentActiveSession();
-      currentDateFilter = detectCurrentEventDay();
       updateSessionButtonsUI();
       updateDayButtonsUI();
       fetchStats();
     }
 
-    function detectCurrentActiveSession() {
-      const now = new Date();
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
-      if (currentMinutes >= 15 * 60 && currentMinutes <= 22 * 60) return 'petang';
-      return 'pagi';
-    }
+    function normalizeDateString(dateVal) {
+      if (!dateVal) return '';
+      const str = String(dateVal).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
 
-    function detectCurrentEventDay() {
-      const today = new Date().toISOString().split('T')[0];
-      if (today === EVENT_DAYS.day1) return 'day1';
-      if (today === EVENT_DAYS.day2) return 'day2';
-      if (today === EVENT_DAYS.day3) return 'day3';
-      return 'day1';
+      // Handle DD/MM/YYYY
+      const dmy = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (dmy) {
+        const d = String(dmy[1]).padStart(2, '0');
+        const m = String(dmy[2]).padStart(2, '0');
+        const y = dmy[3];
+        return `${y}-${m}-${d}`;
+      }
+
+      // Handle ISO timestamp format (e.g. 2026-11-06T14:20:00.000Z)
+      if (str.includes('T')) {
+        return str.split('T')[0];
+      }
+
+      const parsed = new Date(str);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().split('T')[0];
+      }
+      return str;
     }
 
     function getSessionFromTime(timeStr, dateStr) {
       if (!timeStr) return 'lain';
       let hours = -1;
       let minutes = 0;
-      const timeParts = String(timeStr).trim().match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+      
+      const cleanTime = String(timeStr).trim();
+
+      // Check standard HH:mm:ss or HH:mm AM/PM
+      const timeParts = cleanTime.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
       if (timeParts) {
         hours = parseInt(timeParts[1], 10);
         minutes = parseInt(timeParts[2], 10);
@@ -272,12 +285,13 @@
         if (ampm === 'PM' && hours < 12) hours += 12;
         if (ampm === 'AM' && hours === 12) hours = 0;
       } else {
-        const d = new Date(timeStr);
+        const d = new Date(cleanTime);
         if (!isNaN(d.getTime())) {
           hours = d.getHours();
           minutes = d.getMinutes();
         }
       }
+
       if (hours === -1) return 'lain';
       const totalMinutes = hours * 60 + minutes;
       if (totalMinutes >= 10 * 60 && totalMinutes < 15 * 60) return 'pagi';
@@ -316,7 +330,7 @@
         if (currentDateFilter === 'day1') label.textContent = 'Hari 1 (06/11)';
         else if (currentDateFilter === 'day2') label.textContent = 'Hari 2 (07/11)';
         else if (currentDateFilter === 'day3') label.textContent = 'Hari 3 (08/11)';
-        else label.textContent = 'Semua 3 Hari';
+        else label.textContent = 'Semua Hari';
       }
     }
 
@@ -354,10 +368,11 @@
 
     function matchDateFilter(itemDate) {
       if (currentDateFilter === 'all') return true;
-      if (currentDateFilter === 'day1') return itemDate === EVENT_DAYS.day1;
-      if (currentDateFilter === 'day2') return itemDate === EVENT_DAYS.day2;
-      if (currentDateFilter === 'day3') return itemDate === EVENT_DAYS.day3;
-      return itemDate === currentDateFilter;
+      const normalized = normalizeDateString(itemDate);
+      if (currentDateFilter === 'day1') return normalized === EVENT_DAYS.day1;
+      if (currentDateFilter === 'day2') return normalized === EVENT_DAYS.day2;
+      if (currentDateFilter === 'day3') return normalized === EVENT_DAYS.day3;
+      return true;
     }
 
     function renderFilteredView() {
@@ -386,10 +401,10 @@
       const cardIcon = document.getElementById('sessionCardIcon');
       const listTitle = document.getElementById('listTitle');
 
-      let dayText = 'Hari 1 (06/11)';
-      if (currentDateFilter === 'day2') dayText = 'Hari 2 (07/11)';
+      let dayText = 'Semua Hari';
+      if (currentDateFilter === 'day1') dayText = 'Hari 1 (06/11)';
+      else if (currentDateFilter === 'day2') dayText = 'Hari 2 (07/11)';
       else if (currentDateFilter === 'day3') dayText = 'Hari 3 (08/11)';
-      else if (currentDateFilter === 'all') dayText = 'Semua Hari';
 
       let sessText = 'Semua Sesi';
       let sessSub = 'Pengunjung';
