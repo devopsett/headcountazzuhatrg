@@ -481,8 +481,8 @@
             if (tab === 'setup') {
                 dashSec.classList.add('hidden');
                 setupSec.classList.remove('hidden');
-                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
-                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
+                navSetup.className = 'justify-center px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
+                navDash.className = 'justify-center px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
                 document.getElementById('config-event-name').value = state.currentEvent;
                 document.getElementById('config-booth-open').checked = state.boothOpen;
                 document.getElementById('config-kiosk-seconds').value = String(state.kioskSeconds);
@@ -490,8 +490,8 @@
             } else {
                 setupSec.classList.add('hidden');
                 dashSec.classList.remove('hidden');
-                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
-                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
+                navDash.className = 'justify-center px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
+                navSetup.className = 'justify-center px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
             }
             lucide.createIcons();
         }
