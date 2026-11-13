@@ -115,8 +115,9 @@
                 <!-- 2. NAMA JEMAAH -->
                 <div>
                     <label for="input-nama" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">2. Nama Jemaah *</label>
-                    <input type="text" id="input-nama" required placeholder="Contoh: Ahmad bin Abdullah" autocomplete="name"
-                        class="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500 focus:border-azzuha-500 transition-all">
+                    <input type="text" id="input-nama" required placeholder="CONTOH: AHMAD BIN ABDULLAH" autocomplete="name"
+                        oninput="this.value = this.value.toUpperCase()"
+                        class="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-medium uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500 focus:border-azzuha-500 transition-all">
                 </div>
 
                 <!-- 3. NO TELEFON -->
@@ -282,9 +283,9 @@
             }
 
             const pakejEl = document.querySelector('input[name="pakej"]:checked');
-            const pakej = pakejEl ? pakejEl.value : 'Umrah';
-            const nama = document.getElementById('input-nama').value.trim();
-            const phone = document.getElementById('input-phone').value.trim();
+            const pakej = (pakejEl ? pakejEl.value : 'Umrah').toUpperCase();
+            const nama = document.getElementById('input-nama').value.trim().toUpperCase();
+            const phone = document.getElementById('input-phone').value.trim().toUpperCase();
             const pax = Math.max(1, parseInt(document.getElementById('input-pax').value, 10) || 1);
 
             if (!nama || !phone) {
