@@ -491,8 +491,8 @@
         }
 
         function initData() {
-            const localRecords = JSON.parse(localStorage.getItem(KEYS.DEMO_RECORDS) || '[]');
-            state.records = localRecords;
+            // Kosongkan rekod sementara dahulu supaya event baharu sentiasa bermula 0 Pax sebelum tarik data sebenar dari Google Sheet
+            state.records = [];
             populateEventDropdown();
             renderDashboard();
 
@@ -507,10 +507,12 @@
             if (icon) icon.classList.add('animate-spin');
 
             try {
-                const res = await fetch(state.apiUrl);
+                // Gunakan parameter masa (?t=) supaya pelayar sentiasa tarik data segar dari Google Sheet
+                const res = await fetch(`${state.apiUrl}?t=${Date.now()}`);
                 const data = await res.json();
                 if (data.success && Array.isArray(data.records)) {
-                    state.records = data.records;
+                    // Tapis keluar sebarang baris konfigurasi (_CONFIG) supaya tidak dikira sebagai pax
+                    state.records = data.records.filter(r => r.event && r.event !== '_CONFIG' && r.nama);
                     if (data.activeEvent) {
                         state.currentEvent = data.activeEvent;
                         localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
@@ -541,21 +543,27 @@
 
         function populateEventDropdown() {
             const select = document.getElementById('filter-event-select');
-            const prevValue = select.value;
+            const previousVal = select.value;
             const eventSet = new Set([state.currentEvent]);
             state.records.forEach(r => {
-                if (r.event) eventSet.add(r.event);
+                if (r.event && r.event !== '_CONFIG') eventSet.add(r.event);
             });
 
-            let html = `<option value="ALL">Semua Event (${eventSet.size} Tab)</option>`;
+            select.innerHTML = '';
+            const optAll = document.createElement('option');
+            optAll.value = 'ALL';
+            optAll.textContent = 'Semua Event (Keseluruhan)';
+            select.appendChild(optAll);
+
             eventSet.forEach(ev => {
-                const label = ev === state.currentEvent ? `${ev} (Aktif)` : ev;
-                html += `<option value="${escapeHtml(ev)}">${escapeHtml(label)}</option>`;
+                const opt = document.createElement('option');
+                opt.value = ev;
+                opt.textContent = ev === state.currentEvent ? `${ev} (Aktif)` : ev;
+                select.appendChild(opt);
             });
-            select.innerHTML = html;
 
-            if (prevValue && (prevValue === 'ALL' || eventSet.has(prevValue))) {
-                select.value = prevValue;
+            if (previousVal && (previousVal === 'ALL' || eventSet.has(previousVal))) {
+                select.value = previousVal;
             } else {
                 select.value = state.currentEvent;
             }
@@ -565,78 +573,79 @@
             const selectedEvent = document.getElementById('filter-event-select').value;
             const query = document.getElementById('search-input').value.trim().toLowerCase();
 
-            const eventFiltered = selectedEvent === 'ALL'
+            const eventRecords = selectedEvent === 'ALL'
                 ? state.records
                 : state.records.filter(r => r.event === selectedEvent);
 
             let totalPax = 0;
             let umrahPax = 0;
-            let umrahCount = 0;
+            let umrahRekod = 0;
             let hajiPax = 0;
-            let hajiCount = 0;
+            let hajiRekod = 0;
 
-            eventFiltered.forEach(r => {
-                const p = parseInt(r.pax, 10) || 1;
-                totalPax += p;
-                if ((r.pakej || '').toLowerCase() === 'haji') {
-                    hajiPax += p;
-                    hajiCount++;
+            eventRecords.forEach(r => {
+                const pax = parseInt(r.pax, 10) || 1;
+                totalPax += pax;
+                if (String(r.pakej).toLowerCase() === 'haji') {
+                    hajiPax += pax;
+                    hajiRekod += 1;
                 } else {
-                    umrahPax += p;
-                    umrahCount++;
+                    umrahPax += pax;
+                    umrahRekod += 1;
                 }
             });
 
             document.getElementById('stat-total-pax').textContent = totalPax;
-            document.getElementById('stat-total-rekod').textContent = `${eventFiltered.length} rekod pendaftaran`;
+            document.getElementById('stat-total-rekod').textContent = `${eventRecords.length} rekod`;
             document.getElementById('stat-umrah-pax').textContent = umrahPax;
-            document.getElementById('stat-umrah-rekod').textContent = `${umrahCount} keluarga`;
+            document.getElementById('stat-umrah-rekod').textContent = `${umrahRekod} keluarga`;
             document.getElementById('stat-haji-pax').textContent = hajiPax;
-            document.getElementById('stat-haji-rekod').textContent = `${hajiCount} keluarga`;
+            document.getElementById('stat-haji-rekod').textContent = `${hajiRekod} keluarga`;
 
-            const displayed = eventFiltered.filter(r => {
-                if (!query) return true;
-                return (r.nama || '').toLowerCase().includes(query) ||
-                       (r.phone || '').toLowerCase().includes(query) ||
-                       (r.id || '').toLowerCase().includes(query);
-            });
+            const filtered = query
+                ? eventRecords.filter(r =>
+                    String(r.nama).toLowerCase().includes(query) ||
+                    String(r.phone).toLowerCase().includes(query) ||
+                    String(r.id).toLowerCase().includes(query)
+                )
+                : eventRecords;
 
             const listEl = document.getElementById('jemaah-list');
             const emptyEl = document.getElementById('empty-list');
 
-            if (displayed.length === 0) {
+            if (filtered.length === 0) {
                 listEl.innerHTML = '';
                 emptyEl.classList.remove('hidden');
                 return;
             }
 
             emptyEl.classList.add('hidden');
-            listEl.innerHTML = displayed.map(r => {
-                const isHaji = (r.pakej || '').toLowerCase() === 'haji';
+            listEl.innerHTML = filtered.map(r => {
+                const isHaji = String(r.pakej).toLowerCase() === 'haji';
                 const badgeClass = isHaji
                     ? 'bg-amber-100 text-amber-800 border-amber-200'
                     : 'bg-azzuha-100 text-azzuha-800 border-azzuha-200';
-                const dateStr = formatDate(r.timestamp);
+                const timeText = r.timestamp
+                    ? new Date(r.timestamp).toLocaleString('ms-MY', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                    : '';
 
                 return `
                     <div class="p-4 hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-3">
-                        <div class="min-w-0 space-y-1">
+                        <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-bold text-sm text-slate-900 truncate">${escapeHtml(r.nama || '-')}</span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badgeClass}">
-                                    ${escapeHtml(r.pakej || 'Umrah')}
+                                <span class="font-extrabold text-sm text-slate-900 truncate">${escapeHtml(r.nama)}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeClass}">
+                                    ${escapeHtml(r.pakej)}
                                 </span>
                             </div>
-                            <div class="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
-                                <span class="font-medium text-slate-700">${escapeHtml(r.phone || '-')}</span>
-                                <span>•</span>
-                                <span>${escapeHtml(r.event || state.currentEvent)}</span>
-                                <span>•</span>
-                                <span>${dateStr}</span>
+                            <div class="flex items-center gap-3 text-xs text-slate-500 mt-1 flex-wrap">
+                                <span>${escapeHtml(r.phone)}</span>
+                                ${timeText ? `<span>• ${timeText}</span>` : ''}
+                                ${selectedEvent === 'ALL' ? `<span class="text-azzuha-700 font-semibold">• ${escapeHtml(r.event)}</span>` : ''}
                             </div>
                         </div>
                         <div class="shrink-0 text-right">
-                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-azzuha-600 text-white font-extrabold text-xs shadow-sm">
+                            <span class="inline-flex items-center px-3 py-1 rounded-xl bg-azzuha-600 text-white text-xs font-extrabold shadow-xs">
                                 ${parseInt(r.pax, 10) || 1} Pax
                             </span>
                         </div>
@@ -652,61 +661,42 @@
                 : state.records.filter(r => r.event === selectedEvent);
 
             if (rows.length === 0) {
-                showToast('Tiada data untuk dimuat turun.', 'error');
+                showToast('Tiada rekod untuk dimuat turun.', 'error', 'Tiada Data');
                 return;
             }
 
-            const headers = ['ID', 'Tarikh_Masa', 'Nama_Event', 'Pakej', 'Nama_Jemaah', 'No_Telefon', 'Pax'];
-            const csvLines = [headers.join(',')];
+            const header = ['ID', 'Tarikh_Masa', 'Event', 'Pakej', 'Nama_Jemaah', 'No_Telefon', 'Pax'];
+            const csvLines = [header.join(',')];
 
             rows.forEach(r => {
-                const vals = [
-                    r.id || '',
-                    r.timestamp || '',
-                    r.event || '',
-                    r.pakej || '',
-                    r.nama || '',
-                    r.phone || '',
-                    r.pax || 1
-                ].map(v => `"${String(v).replace(/"/g, '""')}"`);
-                csvLines.push(vals.join(','));
+                const line = [
+                    r.id,
+                    r.timestamp,
+                    r.event,
+                    r.pakej,
+                    r.nama,
+                    r.phone,
+                    r.pax
+                ].map(val => `"${String(val || '').replace(/"/g, '""')}"`);
+                csvLines.push(line.join(','));
             });
 
             const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
+            const safeFilename = (selectedEvent === 'ALL' ? 'Semua_Event' : selectedEvent).replace(/[^a-zA-Z0-9_-]/g, '_');
             a.href = url;
-            a.download = `Headcount_Azzuha_${selectedEvent.replace(/\s+/g, '_')}.csv`;
+            a.download = `Headcount_Azzuha_${safeFilename}.csv`;
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        function formatDate(iso) {
-            if (!iso) return '-';
-            try {
-                const d = new Date(iso);
-                return d.toLocaleString('ms-MY', {
-                    day: '2-digit',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } catch {
-                return iso;
-            }
-        }
-
         function escapeHtml(str) {
-            return String(str)
+            return String(str || '')
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function closeStatusModal() {
-            document.getElementById('status-modal').classList.add('hidden');
+                .replace(/"/g, '&quot;');
         }
 
         function showToast(message, type = 'info', title = '') {
@@ -716,22 +706,25 @@
             const msgEl = document.getElementById('status-modal-message');
             const btnEl = document.getElementById('status-modal-btn');
 
-            const isError = type === 'error';
-            titleEl.textContent = title || (isError ? 'Perhatian' : 'Berjaya');
-            msgEl.textContent = message;
-
-            if (isError) {
+            if (type === 'error') {
                 iconWrap.className = 'w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-xs';
                 iconWrap.innerHTML = '<i data-lucide="alert-circle" class="w-8 h-8"></i>';
+                titleEl.textContent = title || 'Perhatian';
                 btnEl.className = 'w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm shadow-sm transition-all';
             } else {
-                iconWrap.className = 'w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs';
+                iconWrap.className = 'w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs';
                 iconWrap.innerHTML = '<i data-lucide="check-circle-2" class="w-8 h-8"></i>';
+                titleEl.textContent = title || 'Berjaya';
                 btnEl.className = 'w-full py-3 px-4 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white font-extrabold text-sm shadow-sm transition-all';
             }
 
+            msgEl.textContent = message;
             modal.classList.remove('hidden');
             lucide.createIcons();
+        }
+
+        function closeStatusModal() {
+            document.getElementById('status-modal').classList.add('hidden');
         }
     </script>
 </body>
