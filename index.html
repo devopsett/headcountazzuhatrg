@@ -265,4 +265,91 @@
             btn.textContent = 'Cipta Tab';
             document.getElementById('edit-event-box').classList.add('hidden');
         }
-// ... existing code ... -->
+
+        function ubahPax(delta) {
+            const input = document.getElementById('input-pax');
+            let val = parseInt(input.value, 10) || 1;
+            val = Math.max(1, Math.min(100, val + delta));
+            input.value = val;
+        }
+
+        async function submitJemaah(e) {
+            e.preventDefault();
+
+            const pakejEl = document.querySelector('input[name="pakej"]:checked');
+            const pakej = pakejEl ? pakejEl.value : 'Umrah';
+            const nama = document.getElementById('input-nama').value.trim();
+            const phone = document.getElementById('input-phone').value.trim();
+            const pax = Math.max(1, parseInt(document.getElementById('input-pax').value, 10) || 1);
+
+            if (!nama || !phone) {
+                showToast('Sila isi Nama dan No. Telefon anda.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Menghantar...</span>';
+
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const timestamp = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+            const newRecord = {
+                id: 'AZH-' + Math.floor(1000 + Math.random() * 9000),
+                timestamp: timestamp,
+                eventName: state.currentEvent,
+                pakej: pakej,
+                nama: nama,
+                phone: phone,
+                pax: pax
+            };
+
+            if (state.apiUrl) {
+                try {
+                    await fetch(state.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(newRecord)
+                    });
+                } catch (err) {
+                    console.error(err);
+                    showToast('Ralat sambungan, sila cuba semula.', 'error');
+                }
+            } else {
+                const existing = JSON.parse(localStorage.getItem(KEYS.DEMO_RECORDS) || '[]');
+                existing.unshift(newRecord);
+                localStorage.setItem(KEYS.DEMO_RECORDS, JSON.stringify(existing));
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i><span>Hantar Pendaftaran</span>';
+            lucide.createIcons();
+
+            document.getElementById('form-card').classList.add('hidden');
+            document.getElementById('success-summary').textContent = `${nama} • Pakej ${pakej} (${pax} Pax)`;
+            document.getElementById('success-card').classList.remove('hidden');
+        }
+
+        function resetUntukJemaahBaru() {
+            document.getElementById('jemaah-form').reset();
+            document.getElementById('input-pax').value = 1;
+            document.getElementById('success-card').classList.add('hidden');
+            document.getElementById('form-card').classList.remove('hidden');
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
+            toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-lg text-xs font-semibold pointer-events-auto transition-all`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 250);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
