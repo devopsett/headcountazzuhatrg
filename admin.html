@@ -38,34 +38,73 @@
     <!-- Notifikasi Toast -->
     <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-sm sm:w-full pointer-events-none mx-auto sm:mx-0"></div>
 
-    <!-- Header Khusus Admin -->
-    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-sm">
+    <!-- Modal / Popup Log Masuk Admin -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-azzuha-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-7 space-y-5">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-azzuha-600 text-white flex items-center justify-center mx-auto shadow-md shadow-azzuha-600/25">
+                    <i data-lucide="lock" class="w-7 h-7"></i>
+                </div>
+                <h2 class="text-lg font-extrabold text-slate-900">Log Masuk Panel Admin</h2>
+                <p class="text-xs text-slate-500">Azzuha Group Travel & Tours • Cawangan Terengganu</p>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label for="login-username" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
+                    <input type="text" id="login-username" required autocomplete="username" placeholder="Masukkan username"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+                    <input type="password" id="login-password" required autocomplete="current-password" placeholder="Masukkan password"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                </div>
+                <p id="login-error" class="hidden text-xs font-semibold text-rose-600 text-center bg-rose-50 py-2 px-3 rounded-lg border border-rose-200">
+                    Username atau password tidak sah.
+                </p>
+                <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white font-extrabold text-sm shadow-md shadow-azzuha-600/25 flex items-center justify-center gap-2 transition-all">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>Sign In</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Wrapper Kandungan Admin (Tersembunyi sehingga berjaya Sign In) -->
+    <div id="admin-app" class="hidden flex-1 flex flex-col">
+
+    <!-- Header Khusus Admin (Tema Azzuha Emerald) -->
+    <header class="bg-gradient-to-r from-azzuha-900 via-azzuha-800 to-azzuha-700 text-white border-b border-azzuha-700/60 sticky top-0 z-30 shadow-md">
         <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-10 h-10 rounded-xl bg-azzuha-600 flex items-center justify-center text-white shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-white shrink-0 shadow-sm">
                     <i data-lucide="shield-check" class="w-5 h-5"></i>
                 </div>
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
                         <span class="font-extrabold text-white text-xs sm:text-sm tracking-tight truncate">Azzuha Group Travel & Tours</span>
-                        <span id="sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 shrink-0">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                            Demo
+                        <span id="sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white border border-white/25 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>
+                            Live
                         </span>
                     </div>
-                    <p class="text-xs font-medium text-azzuha-400 truncate">Panel Admin • Cawangan Terengganu</p>
+                    <p class="text-xs font-medium text-azzuha-100 truncate">Panel Admin • Cawangan Terengganu</p>
                 </div>
             </div>
 
-            <!-- Navigasi Admin (Headcount & Tetapan) -->
-            <nav class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl shrink-0">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-azzuha-600 text-white shadow-sm transition-all flex items-center gap-1.5">
+            <!-- Navigasi Admin (Headcount, Tetapan & Log Keluar) -->
+            <nav class="flex items-center gap-1 bg-azzuha-950/40 border border-white/15 p-1 rounded-xl shrink-0">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5">
                     <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i>
                     <span>Headcount</span>
                 </button>
-                <button onclick="switchTab('setup')" id="nav-setup" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+                <button onclick="switchTab('setup')" id="nav-setup" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     <span>Tetapan</span>
+                </button>
+                <button onclick="logoutAdmin()" title="Log Keluar" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-200 hover:bg-rose-500/25 hover:text-white transition-all flex items-center gap-1">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                 </button>
             </nav>
         </div>
@@ -75,80 +114,123 @@
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
 
         <!-- ========================================================= -->
-        <!-- PAPARAN 1: DASHBOARD HEADCOUNT IKUT EVENT                 -->
+        <!-- PAPARAN 1: DASHBOARD HEADCOUNT ADMIN                      -->
         <!-- ========================================================= -->
         <section id="tab-dashboard" class="space-y-5">
-            
-            <!-- Penapis Event & Butang Refresh -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="calendar" class="w-4 h-4 text-azzuha-600 shrink-0"></i>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pilih Event:</span>
-                </div>
-                <div class="flex items-center gap-2 flex-1 sm:max-w-sm">
-                    <select id="filter-event-select" onchange="renderDashboard()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-azzuha-500">
-                        <!-- Dijana automatik -->
+
+            <!-- Penapis Event & Butang Tindakan -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <label for="filter-event-select" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Pilih Event / Tab Sheet</label>
+                    <select id="filter-event-select" onchange="renderDashboard()"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                        <option value="Ekspo Umrah & Haji 2026">Ekspo Umrah & Haji 2026 (Aktif)</option>
                     </select>
-                    <button onclick="syncData(true)" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0" title="Refresh Data">
-                        <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
+                </div>
+                <div class="flex items-center gap-2 sm:self-end shrink-0">
+                    <button type="button" onclick="syncData(true)" class="px-3.5 py-2.5 rounded-xl bg-azzuha-50 hover:bg-azzuha-100 text-azzuha-800 border border-azzuha-200 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                        <i id="sync-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span>Refresh</span>
                     </button>
-                </div>
-            </div>
-
-            <!-- 3 Kad Statistik Utama (Total, Umrah, Haji) -->
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-sm text-center">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">Jumlah Pax</span>
-                    <span id="stat-total-pax" class="text-3xl sm:text-4xl font-extrabold mt-1 block">0</span>
-                    <span id="stat-total-rekod" class="text-[11px] text-slate-400 mt-1 block">0 rekod</span>
-                </div>
-
-                <div class="bg-white border border-azzuha-200 p-4 sm:p-5 rounded-2xl shadow-sm text-center">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-azzuha-700 block">Umrah</span>
-                    <span id="stat-umrah-pax" class="text-3xl sm:text-4xl font-extrabold text-azzuha-600 mt-1 block">0</span>
-                    <span id="stat-umrah-rekod" class="text-[11px] text-slate-500 mt-1 block">0 keluarga</span>
-                </div>
-
-                <div class="bg-white border border-amber-200 p-4 sm:p-5 rounded-2xl shadow-sm text-center">
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700 block">Haji</span>
-                    <span id="stat-haji-pax" class="text-3xl sm:text-4xl font-extrabold text-amber-600 mt-1 block">0</span>
-                    <span id="stat-haji-rekod" class="text-[11px] text-slate-500 mt-1 block">0 keluarga</span>
-                </div>
-            </div>
-
-            <!-- Jadual / Senarai Rekod Jemaah -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center bg-slate-50/70">
-                    <div class="relative flex-1">
-                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                        <input type="text" id="search-input" oninput="renderDashboard()" placeholder="Cari nama atau no. telefon jemaah..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-azzuha-500">
-                    </div>
-                    <button onclick="exportCSV()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700">
+                    <button type="button" onclick="exportCSV()" class="px-3.5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
                         <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                        Muat Turun CSV
+                        <span>Muat Turun CSV</span>
                     </button>
                 </div>
+            </div>
 
-                <div class="divide-y divide-slate-100" id="jemaah-list">
-                    <!-- Senarai jemaah dipaparkan di sini -->
+            <!-- Kad Statistik Headcount -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <!-- Total Pax -->
+                <div class="bg-gradient-to-br from-azzuha-800 to-azzuha-600 rounded-2xl p-5 text-white shadow-md">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-azzuha-100">Jumlah Keseluruhan</span>
+                        <i data-lucide="users" class="w-5 h-5 text-azzuha-200"></i>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="stat-total-pax" class="text-3xl sm:text-4xl font-extrabold">0</span>
+                        <span class="text-xs font-semibold text-azzuha-100">Pax</span>
+                    </div>
+                    <p id="stat-total-rekod" class="text-xs text-azzuha-100/90 mt-1">0 rekod</p>
                 </div>
 
-                <div id="empty-list" class="hidden py-10 px-4 text-center">
-                    <p class="text-sm font-semibold text-slate-700">Tiada rekod jemaah untuk event ini lagi.</p>
-                    <p class="text-xs text-slate-500 mt-1">Rekod akan muncul secara langsung selepas jemaah menghantar borang di halaman index.html.</p>
+                <!-- Pax Umrah -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-azzuha-700">Pakej Umrah</span>
+                        <div class="w-8 h-8 rounded-lg bg-azzuha-50 text-azzuha-600 flex items-center justify-center">
+                            <!-- Ikon Kaabah SVG -->
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 6l8-3 8 3v12l-8 3-8-3V6z"/>
+                                <path d="M4 9l8 3 8-3"/>
+                                <path d="M12 12v9"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="stat-umrah-pax" class="text-3xl font-extrabold text-slate-900">0</span>
+                        <span class="text-xs font-semibold text-slate-500">Pax</span>
+                    </div>
+                    <p id="stat-umrah-rekod" class="text-xs text-slate-500 mt-1">0 keluarga</p>
+                </div>
+
+                <!-- Pax Haji -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Pakej Haji</span>
+                        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <!-- Ikon Masjid / Kubah SVG -->
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2c-3.5 3-5 5.5-5 8h10c0-2.5-1.5-5-5-8z"/>
+                                <path d="M4 10h16v11H4z"/>
+                                <path d="M9 21v-5a3 3 0 0 1 6 0v5"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="stat-haji-pax" class="text-3xl font-extrabold text-slate-900">0</span>
+                        <span class="text-xs font-semibold text-slate-500">Pax</span>
+                    </div>
+                    <p id="stat-haji-rekod" class="text-xs text-slate-500 mt-1">0 keluarga</p>
                 </div>
             </div>
+
+            <!-- Senarai Rekod Jemaah -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900">Senarai Pendaftaran Jemaah</h3>
+                        <p class="text-xs text-slate-500">Rekod terkini yang dihantar dari borang jemaah</p>
+                    </div>
+                    <div class="relative w-full sm:w-64">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="search-input" oninput="renderDashboard()" placeholder="Cari nama / no. telefon..."
+                            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                    </div>
+                </div>
+
+                <div id="jemaah-list" class="divide-y divide-slate-100"></div>
+
+                <div id="empty-list" class="hidden p-10 text-center space-y-2">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                        <i data-lucide="inbox" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-bold text-slate-700">Tiada rekod jemaah dijumpai</p>
+                    <p class="text-xs text-slate-500">Rekod akan dipaparkan di sini sebaik sahaja jemaah mendaftar.</p>
+                </div>
+            </div>
+
         </section>
 
         <!-- ========================================================= -->
-        <!-- PAPARAN 2: TETAPAN EVENT CUSTOM & GOOGLE APPS SCRIPT      -->
+        <!-- PAPARAN 2: TETAPAN EVENT CUSTOM & KATA LALUAN ADMIN       -->
         <!-- ========================================================= -->
         <section id="tab-setup" class="hidden space-y-5">
             
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
                 <div>
-                    <h2 class="text-base sm:text-lg font-bold text-slate-900">1. Tetapan Event Custom & Sambungan</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Tetapkan nama event aktif dan URL Google Apps Script anda di sini.</p>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">1. Tetapan Event & Operasi Booth</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Urus nama event semasa, status pendaftaran borang jemaah, dan mod kiosk tablet.</p>
                 </div>
 
                 <div>
@@ -157,217 +239,255 @@
                         class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">URL Google Apps Script (Web App)</label>
-                    <input type="url" id="config-api-url" value="https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec" placeholder="https://script.google.com/macros/s/AKfycb.../exec"
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                <!-- Tetapan No 1: Kawalan Status Borang -->
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Status Pendaftaran Booth</h3>
+                        <p id="status-booth-desc" class="text-xs text-slate-500 mt-0.5">Borang pendaftaran dibuka untuk jemaah mengisi maklumat.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="config-booth-open" checked onchange="updateBoothToggleLabel()" class="sr-only peer">
+                        <div class="w-12 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-azzuha-600"></div>
+                    </label>
                 </div>
 
-                <div class="pt-1 flex flex-wrap items-center justify-between gap-2">
-                    <button type="button" onclick="resetDemoData()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-                        Reset Data Demo
-                    </button>
-                    <button type="button" onclick="saveSettings()" class="px-5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-sm font-bold shadow-sm">
+                <!-- Tetapan No 5: Mod Kiosk Auto-Reset -->
+                <div>
+                    <label for="config-kiosk-seconds" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Mod Kiosk Auto-Reset (Tablet Booth)</label>
+                    <select id="config-kiosk-seconds"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                        <option value="0">Dimatikan (Tekan butang 'Daftar Jemaah Seterusnya' secara manual)</option>
+                        <option value="3">Auto-reset selepas 3 saat</option>
+                        <option value="5">Auto-reset selepas 5 saat (Disyorkan untuk Tablet Booth)</option>
+                        <option value="8">Auto-reset selepas 8 saat</option>
+                        <option value="10">Auto-reset selepas 10 saat</option>
+                    </select>
+                    <p class="text-[11px] text-slate-500 mt-1">Borang akan kembali kosong secara automatik selepas jemaah menekan Hantar.</p>
+                </div>
+
+                <div class="pt-1 flex justify-end">
+                    <button type="button" onclick="saveSettings()" class="px-5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-sm font-bold shadow-sm transition-colors">
                         Simpan Tetapan
                     </button>
                 </div>
             </div>
 
-            <!-- Kod Google Apps Script -->
+            <!-- Tukar Password Admin -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
-                <div class="flex items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-base sm:text-lg font-bold text-slate-900">2. Kod Backend Google Apps Script</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Terus mencipta <strong>tab baharu berserta header</strong> bagi setiap nama event di dalam Google Sheet anda.</p>
-                    </div>
-                    <button onclick="copyScript()" id="btn-copy-script" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0">
-                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                        Salin Kod
-                    </button>
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">2. Keselamatan & Kata Laluan Admin</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Ubah kata laluan log masuk untuk akaun <span class="font-bold text-slate-700">azzuhatrg</span>.</p>
                 </div>
 
-                <pre id="apps-script-box" class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed max-h-80">/**
- * Booth Azzuha Headcount Backend — Google Apps Script
- * Sasaran Sheet: https://docs.google.com/spreadsheets/d/1tQ6fhzWnjhJk2aiJhQAaTmA5tVymbfyeDZTxP3QjjF8/edit
- */
+                <form onsubmit="changeAdminPassword(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password Semasa *</label>
+                        <input type="password" id="current-admin-pass" required placeholder="Masukkan password semasa"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                    </div>
 
-const SPREADSHEET_ID = '1tQ6fhzWnjhJk2aiJhQAaTmA5tVymbfyeDZTxP3QjjF8';
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password Baharu *</label>
+                            <input type="password" id="new-admin-pass" required placeholder="Masukkan password baharu"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Sahkan Password Baharu *</label>
+                            <input type="password" id="confirm-admin-pass" required placeholder="Ulang password baharu"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                        </div>
+                    </div>
 
-function getTargetSpreadsheet() {
-  return SpreadsheetApp.openById(SPREADSHEET_ID);
-}
-
-function sanitizeSheetName(name) {
-  const clean = String(name || 'Booth_Azzuha')
-    .replace(/[\[\]\*\/\\\?\:]/g, '')
-    .trim();
-  return clean.substring(0, 95) || 'Booth_Azzuha';
-}
-
-function getOrCreateEventSheet(eventName) {
-  const ss = getTargetSpreadsheet();
-  const sheetName = sanitizeSheetName(eventName);
-  let sheet = ss.getSheetByName(sheetName);
-  
-  if (!sheet) {
-    sheet = ss.insertSheet(sheetName);
-    sheet.appendRow(['ID', 'Tarikh_Masa', 'Pakej', 'Nama_Jemaah', 'No_Telefon', 'Pax']);
-    sheet.getRange('A1:F1').setFontWeight('bold').setBackground('#d1fae5');
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
-}
-
-function doGet(e) {
-  try {
-    const ss = getTargetSpreadsheet();
-    const props = PropertiesService.getScriptProperties();
-    const activeEvent = props.getProperty('ACTIVE_EVENT') || '';
-    const sheets = ss.getSheets();
-    const records = [];
-
-    sheets.forEach(sheet =&gt; {
-      const sheetName = sheet.getName();
-      const rows = sheet.getDataRange().getValues();
-      if (rows.length &lt; 2) return;
-      if (String(rows[0][0]) !== 'ID') return;
-
-      for (let i = 1; i &lt; rows.length; i++) {
-        if (!rows[i][0]) continue;
-        records.push({
-          id: String(rows[i][0]),
-          timestamp: String(rows[i][1]),
-          eventName: sheetName,
-          pakej: String(rows[i][2]),
-          nama: String(rows[i][3]),
-          phone: String(rows[i][4]),
-          pax: Number(rows[i][5]) || 1
-        });
-      }
-    });
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: true, activeEvent: activeEvent, records: records.reverse() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doPost(e) {
-  const lock = LockService.getScriptLock();
-  lock.tryLock(10000);
-
-  try {
-    const data = JSON.parse(e.postData.contents);
-    if (data.action === 'set_event') {
-      const evName = data.eventName || 'Booth Azzuha';
-      PropertiesService.getScriptProperties().setProperty('ACTIVE_EVENT', evName);
-      const createdSheet = getOrCreateEventSheet(evName);
-      return ContentService
-        .createTextOutput(JSON.stringify({ success: true, activeEvent: evName, tab: createdSheet.getName() }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    const sheet = getOrCreateEventSheet(data.eventName || 'Booth Azzuha');
-    
-    const id = data.id || ('AZH-' + Math.floor(1000 + Math.random() * 9000));
-    const masa = data.timestamp || Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'dd/MM/yyyy HH:mm');
-
-    sheet.appendRow([
-      id,
-      masa,
-      data.pakej || 'Umrah',
-      data.nama || '',
-      "'" + (data.phone || ''),
-      Number(data.pax) || 1
-    ]);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: true, id: id, tab: sheet.getName() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}</pre>
+                    <div class="pt-1 flex justify-end">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-azzuha-700 hover:bg-azzuha-800 text-white text-sm font-bold shadow-sm transition-colors">
+                            Kemaskini Password
+                        </button>
+                    </div>
+                </form>
             </div>
         </section>
 
     </main>
 
+    </div>
+
     <script>
         const KEYS = {
-            API_URL: 'azzuha_simple_api_url',
             EVENT_NAME: 'azzuha_simple_event_name',
-            DEMO_RECORDS: 'azzuha_simple_demo_records'
+            DEMO_RECORDS: 'azzuha_simple_demo_records',
+            ADMIN_PASS: 'azzuha_admin_password',
+            ADMIN_AUTH: 'azzuha_admin_authenticated',
+            BOOTH_OPEN: 'azzuha_booth_is_open',
+            KIOSK_SECONDS: 'azzuha_kiosk_auto_reset_sec'
         };
 
-        const SAMPLE_RECORDS = [
-            { id: 'AZH-101', timestamp: '13/11/2026 10:15', eventName: 'Ekspo Umrah & Haji 2026', pakej: 'Umrah', nama: 'Hj. Zulkifli bin Musa', phone: '019-9123456', pax: 4 },
-            { id: 'AZH-102', timestamp: '13/11/2026 10:42', eventName: 'Ekspo Umrah & Haji 2026', pakej: 'Haji', nama: 'Pn. Norazlina Omar', phone: '013-9887766', pax: 2 },
-            { id: 'AZH-103', timestamp: '13/11/2026 11:05', eventName: 'Ekspo Umrah & Haji 2026', pakej: 'Umrah', nama: 'En. Mohd Faizal', phone: '012-9001122', pax: 3 }
-        ];
-
-        const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
+        const ADMIN_USERNAME = 'azzuhatrg';
+        const DEFAULT_ADMIN_PASS = '0711';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
 
         let state = {
-            apiUrl: localStorage.getItem(KEYS.API_URL) || DEFAULT_API_URL,
+            apiUrl: API_URL,
             currentEvent: localStorage.getItem(KEYS.EVENT_NAME) || 'Ekspo Umrah & Haji 2026',
+            boothOpen: localStorage.getItem(KEYS.BOOTH_OPEN) !== 'false',
+            kioskSeconds: parseInt(localStorage.getItem(KEYS.KIOSK_SECONDS) || '0', 10),
             records: []
         };
+
+        function getAdminPassword() {
+            return localStorage.getItem(KEYS.ADMIN_PASS) || DEFAULT_ADMIN_PASS;
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('login-username').value.trim();
+            const passwordInput = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+
+            if (usernameInput === ADMIN_USERNAME && passwordInput === getAdminPassword()) {
+                sessionStorage.setItem(KEYS.ADMIN_AUTH, 'true');
+                errorEl.classList.add('hidden');
+                unlockAdminPanel();
+            } else {
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function unlockAdminPanel() {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('admin-app').classList.remove('hidden');
+            initData();
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem(KEYS.ADMIN_AUTH);
+            document.getElementById('admin-app').classList.add('hidden');
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.getElementById('login-password').value = '';
+        }
+
+        function changeAdminPassword(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('current-admin-pass').value;
+            const newPass = document.getElementById('new-admin-pass').value;
+            const confirmPass = document.getElementById('confirm-admin-pass').value;
+
+            if (currentPass !== getAdminPassword()) {
+                showToast('Password semasa tidak tepat.', 'error');
+                return;
+            }
+            if (newPass.length < 4) {
+                showToast('Password baharu mesti sekurang-kurangnya 4 aksara.', 'error');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                showToast('Pengesahan password baharu tidak sepadan.', 'error');
+                return;
+            }
+
+            localStorage.setItem(KEYS.ADMIN_PASS, newPass);
+            document.getElementById('current-admin-pass').value = '';
+            document.getElementById('new-admin-pass').value = '';
+            document.getElementById('confirm-admin-pass').value = '';
+            showToast('Password Admin berjaya dikemaskini!', 'info');
+        }
+
+        function updateBoothToggleLabel() {
+            const isOpen = document.getElementById('config-booth-open').checked;
+            const desc = document.getElementById('status-booth-desc');
+            desc.textContent = isOpen
+                ? 'Borang pendaftaran DIBUKA untuk jemaah mengisi maklumat.'
+                : 'Borang pendaftaran DITUTUP sementara (jemaah tidak boleh hantar).';
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             document.getElementById('config-event-name').value = state.currentEvent;
-            document.getElementById('config-api-url').value = state.apiUrl;
-            initData();
+            document.getElementById('config-booth-open').checked = state.boothOpen;
+            document.getElementById('config-kiosk-seconds').value = String(state.kioskSeconds);
+            updateBoothToggleLabel();
+
+            if (sessionStorage.getItem(KEYS.ADMIN_AUTH) === 'true') {
+                unlockAdminPanel();
+            } else {
+                document.getElementById('login-username').focus();
+            }
         });
 
         function switchTab(tab) {
-            document.getElementById('tab-dashboard').classList.toggle('hidden', tab !== 'dashboard');
-            document.getElementById('tab-setup').classList.toggle('hidden', tab !== 'setup');
-
-            const navDash = document.getElementById('nav-dashboard');
-            const navSetup = document.getElementById('nav-setup');
-
+            const tabs = ['dashboard', 'setup'];
+            tabs.forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    section.classList.remove('hidden');
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
+                } else {
+                    section.classList.add('hidden');
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
+                }
+            });
             if (tab === 'dashboard') {
-                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-azzuha-600 text-white shadow-sm transition-all flex items-center gap-1.5';
-                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
-            } else {
-                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-azzuha-600 text-white shadow-sm transition-all flex items-center gap-1.5';
-                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
-            }
-        }
-
-        function initData() {
-            const badge = document.getElementById('sync-badge');
-            if (state.apiUrl) {
-                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 shrink-0';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Live';
-                syncData(false);
-            } else {
-                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 shrink-0';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Demo';
-                const saved = localStorage.getItem(KEYS.DEMO_RECORDS);
-                state.records = saved ? JSON.parse(saved) : [...SAMPLE_RECORDS];
-                populateEventDropdown();
                 renderDashboard();
             }
         }
 
-        async function syncData(manual) {
-            if (!state.apiUrl) {
-                initData();
-                if (manual) showToast('Mod Demo aktif.', 'info');
+        async function saveSettings() {
+            const eventName = document.getElementById('config-event-name').value.trim();
+            const boothOpen = document.getElementById('config-booth-open').checked;
+            const kioskSeconds = parseInt(document.getElementById('config-kiosk-seconds').value, 10) || 0;
+
+            if (!eventName) {
+                showToast('Sila masukkan Nama Event Booth.', 'error');
                 return;
             }
 
+            state.currentEvent = eventName;
+            state.boothOpen = boothOpen;
+            state.kioskSeconds = kioskSeconds;
+
+            localStorage.setItem(KEYS.EVENT_NAME, eventName);
+            localStorage.setItem(KEYS.BOOTH_OPEN, String(boothOpen));
+            localStorage.setItem(KEYS.KIOSK_SECONDS, String(kioskSeconds));
+
+            if (state.apiUrl) {
+                try {
+                    await fetch(state.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'set_event',
+                            eventName: eventName,
+                            boothOpen: boothOpen,
+                            kioskSeconds: kioskSeconds
+                        })
+                    });
+                    showToast('Tetapan event & operasi booth berjaya disimpan!', 'info');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Tetapan disimpan secara lokal, tetapi gagal menyelaraskan ke Google Sheet.', 'error');
+                }
+            } else {
+                showToast('Tetapan berjaya disimpan!', 'info');
+            }
+
+            initData();
+            switchTab('dashboard');
+        }
+
+        function initData() {
+            const localRecords = JSON.parse(localStorage.getItem(KEYS.DEMO_RECORDS) || '[]');
+            state.records = localRecords;
+            populateEventDropdown();
+            renderDashboard();
+
+            if (state.apiUrl) {
+                syncData(false);
+            }
+        }
+
+        async function syncData(manual = false) {
+            if (!state.apiUrl) return;
             const icon = document.getElementById('sync-icon');
             if (icon) icon.classList.add('animate-spin');
 
@@ -381,13 +501,24 @@ function doPost(e) {
                         localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
                         document.getElementById('config-event-name').value = state.currentEvent;
                     }
+                    if (typeof data.boothOpen === 'boolean') {
+                        state.boothOpen = data.boothOpen;
+                        localStorage.setItem(KEYS.BOOTH_OPEN, String(state.boothOpen));
+                        document.getElementById('config-booth-open').checked = state.boothOpen;
+                        updateBoothToggleLabel();
+                    }
+                    if (typeof data.kioskSeconds === 'number') {
+                        state.kioskSeconds = data.kioskSeconds;
+                        localStorage.setItem(KEYS.KIOSK_SECONDS, String(state.kioskSeconds));
+                        document.getElementById('config-kiosk-seconds').value = String(state.kioskSeconds);
+                    }
                     populateEventDropdown();
                     renderDashboard();
-                    if (manual) showToast('Data headcount dikemas kini!', 'info');
+                    if (manual) showToast('Data terkini berjaya dimuat turun.', 'info');
                 }
             } catch (err) {
                 console.error(err);
-                if (manual) showToast('Gagal membaca data Google Sheet.', 'error');
+                if (manual) showToast('Gagal menyambung ke Google Sheet.', 'error');
             } finally {
                 if (icon) icon.classList.remove('animate-spin');
             }
@@ -395,22 +526,21 @@ function doPost(e) {
 
         function populateEventDropdown() {
             const select = document.getElementById('filter-event-select');
-            const prev = select.value;
-
+            const prevValue = select.value;
             const eventSet = new Set([state.currentEvent]);
             state.records.forEach(r => {
-                if (r.eventName) eventSet.add(r.eventName);
+                if (r.event) eventSet.add(r.event);
             });
 
-            let html = `<option value="__ALL__">Semua Event (${state.records.length} rekod)</option>`;
+            let html = `<option value="ALL">Semua Event (${eventSet.size} Tab)</option>`;
             eventSet.forEach(ev => {
                 const label = ev === state.currentEvent ? `${ev} (Aktif)` : ev;
                 html += `<option value="${escapeHtml(ev)}">${escapeHtml(label)}</option>`;
             });
-
             select.innerHTML = html;
-            if (prev && (prev === '__ALL__' || eventSet.has(prev))) {
-                select.value = prev;
+
+            if (prevValue && (prevValue === 'ALL' || eventSet.has(prevValue))) {
+                select.value = prevValue;
             } else {
                 select.value = state.currentEvent;
             }
@@ -418,130 +548,95 @@ function doPost(e) {
 
         function renderDashboard() {
             const selectedEvent = document.getElementById('filter-event-select').value;
-            const search = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
 
-            const byEvent = selectedEvent === '__ALL__'
+            const eventFiltered = selectedEvent === 'ALL'
                 ? state.records
-                : state.records.filter(r => r.eventName === selectedEvent);
+                : state.records.filter(r => r.event === selectedEvent);
 
-            let totalPax = 0, umrahPax = 0, umrahRekod = 0, hajiPax = 0, hajiRekod = 0;
+            let totalPax = 0;
+            let umrahPax = 0;
+            let umrahCount = 0;
+            let hajiPax = 0;
+            let hajiCount = 0;
 
-            byEvent.forEach(r => {
-                const pax = Number(r.pax) || 1;
-                totalPax += pax;
-                if (r.pakej === 'Haji') {
-                    hajiPax += pax;
-                    hajiRekod++;
+            eventFiltered.forEach(r => {
+                const p = parseInt(r.pax, 10) || 1;
+                totalPax += p;
+                if ((r.pakej || '').toLowerCase() === 'haji') {
+                    hajiPax += p;
+                    hajiCount++;
                 } else {
-                    umrahPax += pax;
-                    umrahRekod++;
+                    umrahPax += p;
+                    umrahCount++;
                 }
             });
 
             document.getElementById('stat-total-pax').textContent = totalPax;
-            document.getElementById('stat-total-rekod').textContent = `${byEvent.length} rekod`;
+            document.getElementById('stat-total-rekod').textContent = `${eventFiltered.length} rekod pendaftaran`;
             document.getElementById('stat-umrah-pax').textContent = umrahPax;
-            document.getElementById('stat-umrah-rekod').textContent = `${umrahRekod} keluarga`;
+            document.getElementById('stat-umrah-rekod').textContent = `${umrahCount} keluarga`;
             document.getElementById('stat-haji-pax').textContent = hajiPax;
-            document.getElementById('stat-haji-rekod').textContent = `${hajiRekod} keluarga`;
+            document.getElementById('stat-haji-rekod').textContent = `${hajiCount} keluarga`;
 
-            const filtered = byEvent.filter(r => {
-                if (!search) return true;
-                return (r.nama || '').toLowerCase().includes(search) ||
-                       (r.phone || '').toLowerCase().includes(search);
+            const displayed = eventFiltered.filter(r => {
+                if (!query) return true;
+                return (r.nama || '').toLowerCase().includes(query) ||
+                       (r.phone || '').toLowerCase().includes(query) ||
+                       (r.id || '').toLowerCase().includes(query);
             });
 
             const listEl = document.getElementById('jemaah-list');
             const emptyEl = document.getElementById('empty-list');
 
-            if (filtered.length === 0) {
+            if (displayed.length === 0) {
                 listEl.innerHTML = '';
                 emptyEl.classList.remove('hidden');
                 return;
             }
 
             emptyEl.classList.add('hidden');
-            listEl.innerHTML = filtered.map(r => {
-                const isHaji = r.pakej === 'Haji';
+            listEl.innerHTML = displayed.map(r => {
+                const isHaji = (r.pakej || '').toLowerCase() === 'haji';
                 const badgeClass = isHaji
                     ? 'bg-amber-100 text-amber-800 border-amber-200'
                     : 'bg-azzuha-100 text-azzuha-800 border-azzuha-200';
+                const dateStr = formatDate(r.timestamp);
 
                 return `
-                    <div class="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
-                        <div class="min-w-0 flex-1">
+                    <div class="p-4 hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-3">
+                        <div class="min-w-0 space-y-1">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold border ${badgeClass}">${escapeHtml(r.pakej)}</span>
-                                <h4 class="font-bold text-slate-900 text-sm truncate">${escapeHtml(r.nama)}</h4>
+                                <span class="font-bold text-sm text-slate-900 truncate">${escapeHtml(r.nama || '-')}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badgeClass}">
+                                    ${escapeHtml(r.pakej || 'Umrah')}
+                                </span>
                             </div>
-                            <div class="flex items-center gap-3 mt-1 text-xs text-slate-500 flex-wrap">
-                                <span>${escapeHtml(r.phone)}</span>
+                            <div class="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                                <span class="font-medium text-slate-700">${escapeHtml(r.phone || '-')}</span>
                                 <span>•</span>
-                                <span>${escapeHtml(r.timestamp)}</span>
-                                ${selectedEvent === '__ALL__' ? `<span class="text-azzuha-700 font-medium">• ${escapeHtml(r.eventName)}</span>` : ''}
+                                <span>${escapeHtml(r.event || state.currentEvent)}</span>
+                                <span>•</span>
+                                <span>${dateStr}</span>
                             </div>
                         </div>
-                        <div class="text-right shrink-0 bg-slate-100 px-3 py-1.5 rounded-xl">
-                            <span class="text-base font-extrabold text-slate-900 block leading-none">${Number(r.pax) || 1}</span>
-                            <span class="text-[10px] font-semibold text-slate-500 uppercase">Pax</span>
+                        <div class="shrink-0 text-right">
+                            <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-azzuha-600 text-white font-extrabold text-xs shadow-sm">
+                                ${parseInt(r.pax, 10) || 1} Pax
+                            </span>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        async function saveSettings() {
-            const eventName = document.getElementById('config-event-name').value.trim();
-            const apiUrl = document.getElementById('config-api-url').value.trim();
-
-            if (!eventName) {
-                showToast('Sila masukkan Nama Event Booth.', 'error');
-                return;
-            }
-
-            state.currentEvent = eventName;
-            state.apiUrl = apiUrl;
-
-            localStorage.setItem(KEYS.EVENT_NAME, eventName);
-            localStorage.setItem(KEYS.API_URL, apiUrl);
-
-            if (apiUrl) {
-                try {
-                    await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'set_event', eventName: eventName })
-                    });
-                    showToast(`Tab "${eventName}" dicipta di Google Sheet & tetapan disimpan!`, 'info');
-                } catch (err) {
-                    console.error(err);
-                    showToast('Tetapan disimpan, tetapi gagal mencipta tab di Google Sheet.', 'error');
-                }
-            } else {
-                showToast('Tetapan berjaya disimpan!', 'info');
-            }
-
-            initData();
-            switchTab('dashboard');
-        }
-
-        function resetDemoData() {
-            localStorage.setItem(KEYS.DEMO_RECORDS, JSON.stringify(SAMPLE_RECORDS));
-            if (!state.apiUrl) {
-                state.records = [...SAMPLE_RECORDS];
-                populateEventDropdown();
-                renderDashboard();
-            }
-            showToast('Data demo ditetapkan semula.', 'info');
-        }
-
         function exportCSV() {
             const selectedEvent = document.getElementById('filter-event-select').value;
-            const rowsToExport = selectedEvent === '__ALL__'
+            const rows = selectedEvent === 'ALL'
                 ? state.records
-                : state.records.filter(r => r.eventName === selectedEvent);
+                : state.records.filter(r => r.event === selectedEvent);
 
-            if (rowsToExport.length === 0) {
+            if (rows.length === 0) {
                 showToast('Tiada data untuk dimuat turun.', 'error');
                 return;
             }
@@ -549,70 +644,66 @@ function doPost(e) {
             const headers = ['ID', 'Tarikh_Masa', 'Nama_Event', 'Pakej', 'Nama_Jemaah', 'No_Telefon', 'Pax'];
             const csvLines = [headers.join(',')];
 
-            rowsToExport.forEach(r => {
-                const row = [
-                    r.id,
-                    r.timestamp,
-                    r.eventName,
-                    r.pakej,
-                    `"${(r.nama || '').replace(/"/g, '""')}"`,
-                    `"${(r.phone || '').replace(/"/g, '""')}"`,
-                    r.pax
-                ];
-                csvLines.push(row.join(','));
+            rows.forEach(r => {
+                const vals = [
+                    r.id || '',
+                    r.timestamp || '',
+                    r.event || '',
+                    r.pakej || '',
+                    r.nama || '',
+                    r.phone || '',
+                    r.pax || 1
+                ].map(v => `"${String(v).replace(/"/g, '""')}"`);
+                csvLines.push(vals.join(','));
             });
 
             const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Headcount_Azzuha_${selectedEvent === '__ALL__' ? 'Semua' : selectedEvent.replace(/\s+/g, '_')}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Headcount_Azzuha_${selectedEvent.replace(/\s+/g, '_')}.csv`;
+            a.click();
             URL.revokeObjectURL(url);
         }
 
-        function copyScript() {
-            const text = document.getElementById('apps-script-box').textContent;
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-
-            const btn = document.getElementById('btn-copy-script');
-            btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Disalin!';
-            lucide.createIcons();
-            showToast('Kod Google Apps Script berjaya disalin!', 'info');
-            setTimeout(() => {
-                btn.innerHTML = '<i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Kod';
-                lucide.createIcons();
-            }, 2500);
-        }
-
-        function showToast(msg, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bg = type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
-            toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-lg text-xs font-semibold pointer-events-auto transition-all`;
-            toast.textContent = msg;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 250);
-            }, 3000);
+        function formatDate(iso) {
+            if (!iso) return '-';
+            try {
+                const d = new Date(iso);
+                return d.toLocaleString('ms-MY', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch {
+                return iso;
+            }
         }
 
         function escapeHtml(str) {
-            return String(str ?? '')
+            return String(str)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = type === 'error'
+                ? 'bg-rose-600 text-white'
+                : 'bg-azzuha-700 text-white';
+
+            toast.className = `${colors} px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3500);
         }
     </script>
 </body>
