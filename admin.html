@@ -1,566 +1,347 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azzuha - Panel Urusetia MATTA Fair</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in { animation: fadeIn 0.22s ease-out forwards; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Headcount — Azzuha Group Travel & Tours</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        azzuha: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-16 selection:bg-emerald-600 selection:text-white">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
 
-  <!-- PIN Protection Overlay (Wajib Sebelum Buka Data) -->
-  <div id="authScreen" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 text-center fade-in">
-      <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-800 mx-auto flex items-center justify-center text-2xl">
-        <i class="fa-solid fa-user-shield"></i>
-      </div>
-      <div>
-        <h2 class="font-extrabold text-slate-800 text-lg">Akses Panel Urusetia</h2>
-        <p class="text-xs text-slate-500 mt-1">Azzuha Group Travel & Tours</p>
-      </div>
-      <div>
-        <input type="password" id="adminPinInput" placeholder="Masukkan PIN" maxlength="6"
-          class="w-full text-center py-3 text-xl font-bold tracking-widest bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-600 focus:outline-none" />
-      </div>
-      <p id="pinErrorMsg" class="hidden text-xs font-bold text-rose-600">PIN Tidak Sah!</p>
-      <button onclick="verifyAdminPin()" id="btnVerify"
-        class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition shadow-md touch-manipulation">
-        Masuk Sistem
-      </button>
-    </div>
-  </div>
+    <!-- Notifikasi Toast -->
+    <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-sm sm:w-full pointer-events-none mx-auto sm:mx-0"></div>
 
-  <!-- Header Urusetia -->
-  <header class="w-full bg-slate-900 text-white border-b border-slate-800 shadow-md">
-    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0">
-          <i class="fa-solid fa-chart-pie text-sm"></i>
+    <!-- Header Khusus Admin -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-azzuha-600 flex items-center justify-center text-white shrink-0">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-white text-xs sm:text-sm tracking-tight truncate">Azzuha Group Travel & Tours</span>
+                        <span id="sync-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                            Demo
+                        </span>
+                    </div>
+                    <p class="text-xs font-medium text-azzuha-400 truncate">Panel Admin • Cawangan Terengganu</p>
+                </div>
+            </div>
+
+            <!-- Navigasi Admin (Headcount & Tetapan) -->
+            <nav class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl shrink-0">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-azzuha-600 text-white shadow-sm transition-all flex items-center gap-1.5">
+                    <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i>
+                    <span>Headcount</span>
+                </button>
+                <button onclick="switchTab('setup')" id="nav-setup" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    <span>Tetapan</span>
+                </button>
+            </nav>
         </div>
-        <div>
-          <h1 class="font-bold text-sm text-white leading-tight">Panel Urusetia MATTA Fair</h1>
-          <p class="text-[10px] text-slate-400">Azzuha Group Travel & Tours</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="fetchStats()" class="p-2 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs border border-slate-700 transition flex items-center gap-1.5 touch-manipulation" title="Muat Semula">
-          <i id="refreshIcon" class="fa-solid fa-rotate"></i>
-          <span class="hidden sm:inline font-semibold">Refresh</span>
-        </button>
-        <button onclick="logoutAdmin()" class="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs border border-rose-500/30 transition touch-manipulation" title="Log Keluar">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="w-full max-w-md mx-auto px-3.5 sm:px-4 pt-4 space-y-3.5">
+    <!-- Kandungan Utama Admin -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
 
-    <!-- Penapis Hari Acara (06/11, 07/11, 08/11) -->
-    <div class="bg-white rounded-2xl p-2.5 shadow-sm border border-slate-200 space-y-1.5">
-      <div class="flex items-center justify-between px-1">
-        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-          <i class="fa-regular fa-calendar-days text-emerald-600"></i> Pilihan Hari
-        </span>
-        <span id="activeDateLabel" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-          Semua Hari
-        </span>
-      </div>
-      <div class="grid grid-cols-4 gap-1">
-        <button type="button" onclick="setDateFilter('all')" id="btnDayAll"
-          class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm">
-          Semua
-        </button>
-        <button type="button" onclick="setDateFilter('day1')" id="btnDay1"
-          class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
-          Hari 1
-        </button>
-        <button type="button" onclick="setDateFilter('day2')" id="btnDay2"
-          class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
-          Hari 2
-        </button>
-        <button type="button" onclick="setDateFilter('day3')" id="btnDay3"
-          class="day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600">
-          Hari 3
-        </button>
-      </div>
-    </div>
+        <!-- ========================================================= -->
+        <!-- PAPARAN 1: DASHBOARD HEADCOUNT IKUT EVENT                 -->
+        <!-- ========================================================= -->
+        <section id="tab-dashboard" class="space-y-5">
+            
+            <!-- Penapis Event & Butang Refresh -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4 text-azzuha-600 shrink-0"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pilih Event:</span>
+                </div>
+                <div class="flex items-center gap-2 flex-1 sm:max-w-sm">
+                    <select id="filter-event-select" onchange="renderDashboard()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                        <!-- Dijana automatik -->
+                    </select>
+                    <button onclick="syncData(true)" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0" title="Refresh Data">
+                        <i data-lucide="refresh-cw" id="sync-icon" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
 
-    <!-- Penapis Sesi (Pagi / Petang / Semua) -->
-    <div class="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200 grid grid-cols-3 gap-1">
-      <button type="button" onclick="setSessionFilter('all')" id="btnSessionAll"
-        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm">
-        Semua Sesi
-      </button>
-      <button type="button" onclick="setSessionFilter('pagi')" id="btnSessionPagi"
-        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600 flex items-center justify-center gap-1">
-        <i class="fa-solid fa-sun text-[11px]"></i>
-        <span>Pagi</span>
-      </button>
-      <button type="button" onclick="setSessionFilter('petang')" id="btnSessionPetang"
-        class="session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 text-slate-600 flex items-center justify-center gap-1">
-        <i class="fa-solid fa-moon text-[11px]"></i>
-        <span>Petang</span>
-      </button>
-    </div>
+            <!-- 3 Kad Statistik Utama (Total, Umrah, Haji) -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-sm text-center">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">Jumlah Pax</span>
+                    <span id="stat-total-pax" class="text-3xl sm:text-4xl font-extrabold mt-1 block">0</span>
+                    <span id="stat-total-rekod" class="text-[11px] text-slate-400 mt-1 block">0 rekod</span>
+                </div>
 
-    <!-- Ringkasan Angka Pengunjung -->
-    <div class="grid grid-cols-2 gap-2.5">
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between">
-          <span id="sessionCountLabel" class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Hari 1 • Pagi</span>
-          <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-            <i id="sessionCardIcon" class="fa-solid fa-calendar-day"></i>
-          </span>
-        </div>
-        <div id="todayGroups" class="text-3xl font-extrabold text-emerald-600 mt-1 leading-none">0</div>
-        <div id="sessionCountSubtext" class="text-xs text-slate-500 mt-1 font-medium">Pengunjung Sesi</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Keseluruhan</span>
-          <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
-            <i class="fa-solid fa-users"></i>
-          </span>
-        </div>
-        <div id="totalGroups" class="text-3xl font-extrabold text-slate-800 mt-1 leading-none">0</div>
-        <div class="text-xs text-slate-500 mt-1 font-medium">Jumlah Pengunjung</div>
-      </div>
-    </div>
+                <div class="bg-white border border-azzuha-200 p-4 sm:p-5 rounded-2xl shadow-sm text-center">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-azzuha-700 block">Umrah</span>
+                    <span id="stat-umrah-pax" class="text-3xl sm:text-4xl font-extrabold text-azzuha-600 mt-1 block">0</span>
+                    <span id="stat-umrah-rekod" class="text-[11px] text-slate-500 mt-1 block">0 keluarga</span>
+                </div>
 
-    <!-- Carta Pecahan Kategori -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
-      <div class="flex justify-between items-center">
-        <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-          <i class="fa-solid fa-chart-pie text-emerald-600"></i> Pecahan Minat
-        </h2>
-        <button onclick="exportCSV()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold px-2.5 py-1 rounded-xl transition flex items-center gap-1.5 touch-manipulation">
-          <i class="fa-solid fa-file-csv"></i> Muat Turun CSV
-        </button>
-      </div>
-      <div id="categoryBreakdown" class="space-y-2 pt-1"></div>
-    </div>
+                <div class="bg-white border border-amber-200 p-4 sm:p-5 rounded-2xl shadow-sm text-center">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700 block">Haji</span>
+                    <span id="stat-haji-pax" class="text-3xl sm:text-4xl font-extrabold text-amber-600 mt-1 block">0</span>
+                    <span id="stat-haji-rekod" class="text-[11px] text-slate-500 mt-1 block">0 keluarga</span>
+                </div>
+            </div>
 
-    <!-- Senarai Pengunjung & WhatsApp -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-      <div class="flex justify-between items-center mb-2.5">
-        <h2 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-          <i class="fa-solid fa-list-check text-emerald-600"></i> <span id="listTitle">Senarai Pengunjung</span>
-        </h2>
-        <span id="logCountBadge" class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">0 rekod</span>
-      </div>
+            <!-- Jadual / Senarai Rekod Jemaah -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center bg-slate-50/70">
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="search-input" oninput="renderDashboard()" placeholder="Cari nama atau no. telefon jemaah..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                    </div>
+                    <button onclick="exportCSV()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        Muat Turun CSV
+                    </button>
+                </div>
 
-      <div class="mb-3">
-        <input type="text" id="searchInput" oninput="renderFilteredView()" placeholder="Cari nama atau nombor telefon..."
-          class="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-600 focus:outline-none" />
-      </div>
+                <div class="divide-y divide-slate-100" id="jemaah-list">
+                    <!-- Senarai jemaah dipaparkan di sini -->
+                </div>
 
-      <div id="recentList" class="divide-y divide-slate-100 text-xs sm:text-sm max-h-80 overflow-y-auto pr-1"></div>
-    </div>
+                <div id="empty-list" class="hidden py-10 px-4 text-center">
+                    <p class="text-sm font-semibold text-slate-700">Tiada rekod jemaah untuk event ini lagi.</p>
+                    <p class="text-xs text-slate-500 mt-1">Rekod akan muncul secara langsung selepas jemaah menghantar borang di halaman index.html.</p>
+                </div>
+            </div>
+        </section>
 
-  </main>
+        <!-- ========================================================= -->
+        <!-- PAPARAN 2: TETAPAN EVENT CUSTOM & GOOGLE APPS SCRIPT      -->
+        <!-- ========================================================= -->
+        <section id="tab-setup" class="hidden space-y-5">
+            
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">1. Tetapan Event Custom & Sambungan</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Tetapkan nama event aktif dan URL Google Apps Script anda di sini.</p>
+                </div>
 
-  <script>
-    const LIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
-    let cachedLogs = [];
-    let currentSessionFilter = 'all';
-    let currentDateFilter = 'all';
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nama Event Booth Semasa *</label>
+                    <input type="text" id="config-event-name" placeholder="Contoh: Ekspo Umrah & Haji 2026"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                </div>
 
-    const EVENT_DAYS = {
-      day1: '2026-11-06',
-      day2: '2026-11-07',
-      day3: '2026-11-08'
-    };
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">URL Google Apps Script (Web App)</label>
+                    <input type="url" id="config-api-url" value="https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec" placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                </div>
 
-    let rawStats = { todayPax: 0, totalPax: 0, todayGroups: 0, totalGroups: 0 };
+                <div class="pt-1 flex flex-wrap items-center justify-between gap-2">
+                    <button type="button" onclick="resetDemoData()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                        Reset Data Demo
+                    </button>
+                    <button type="button" onclick="saveSettings()" class="px-5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-sm font-bold shadow-sm">
+                        Simpan Tetapan
+                    </button>
+                </div>
+            </div>
 
-    window.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('azzuha_admin_auth') === 'true') {
-        hideAuthScreen();
-        initDashboard();
-      } else {
-        document.getElementById('adminPinInput').focus();
+            <!-- Kod Google Apps Script -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">2. Kod Backend Google Apps Script</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Terus mencipta <strong>tab baharu berserta header</strong> bagi setiap nama event di dalam Google Sheet anda.</p>
+                    </div>
+                    <button onclick="copyScript()" id="btn-copy-script" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        Salin Kod
+                    </button>
+                </div>
+
+                <pre id="apps-script-box" class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed max-h-80">/**
+ * Booth Azzuha Headcount Backend — Google Apps Script
+ * Sasaran Sheet: https://docs.google.com/spreadsheets/d/1tQ6fhzWnjhJk2aiJhQAaTmA5tVymbfyeDZTxP3QjjF8/edit
+ */
+
+const SPREADSHEET_ID = '1tQ6fhzWnjhJk2aiJhQAaTmA5tVymbfyeDZTxP3QjjF8';
+
+function getTargetSpreadsheet() {
+  return SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
+function sanitizeSheetName(name) {
+  const clean = String(name || 'Booth_Azzuha')
+    .replace(/[\[\]\*\/\\\?\:]/g, '')
+    .trim();
+  return clean.substring(0, 95) || 'Booth_Azzuha';
+}
+
+function getOrCreateEventSheet(eventName) {
+  const ss = getTargetSpreadsheet();
+  const sheetName = sanitizeSheetName(eventName);
+  let sheet = ss.getSheetByName(sheetName);
+  
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(['ID', 'Tarikh_Masa', 'Pakej', 'Nama_Jemaah', 'No_Telefon', 'Pax']);
+    sheet.getRange('A1:F1').setFontWeight('bold').setBackground('#d1fae5');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function doGet(e) {
+  try {
+    const ss = getTargetSpreadsheet();
+    const props = PropertiesService.getScriptProperties();
+    const activeEvent = props.getProperty('ACTIVE_EVENT') || '';
+    const sheets = ss.getSheets();
+    const records = [];
+
+    sheets.forEach(sheet =&gt; {
+      const sheetName = sheet.getName();
+      const rows = sheet.getDataRange().getValues();
+      if (rows.length &lt; 2) return;
+      if (String(rows[0][0]) !== 'ID') return;
+
+      for (let i = 1; i &lt; rows.length; i++) {
+        if (!rows[i][0]) continue;
+        records.push({
+          id: String(rows[i][0]),
+          timestamp: String(rows[i][1]),
+          eventName: sheetName,
+          pakej: String(rows[i][2]),
+          nama: String(rows[i][3]),
+          phone: String(rows[i][4]),
+          pax: Number(rows[i][5]) || 1
+        });
       }
     });
 
-    function hideAuthScreen() {
-      const auth = document.getElementById('authScreen');
-      auth.classList.add('hidden');
-      auth.classList.remove('flex');
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, activeEvent: activeEvent, records: records.reverse() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+
+  try {
+    const data = JSON.parse(e.postData.contents);
+    if (data.action === 'set_event') {
+      const evName = data.eventName || 'Booth Azzuha';
+      PropertiesService.getScriptProperties().setProperty('ACTIVE_EVENT', evName);
+      const createdSheet = getOrCreateEventSheet(evName);
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, activeEvent: evName, tab: createdSheet.getName() }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
-    function logoutAdmin() {
-      sessionStorage.removeItem('azzuha_admin_auth');
-      window.location.reload();
-    }
+    const sheet = getOrCreateEventSheet(data.eventName || 'Booth Azzuha');
+    
+    const id = data.id || ('AZH-' + Math.floor(1000 + Math.random() * 9000));
+    const masa = data.timestamp || Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'dd/MM/yyyy HH:mm');
 
-    async function verifyAdminPin() {
-      const pin = document.getElementById('adminPinInput').value.trim();
-      const err = document.getElementById('pinErrorMsg');
-      const btn = document.getElementById('btnVerify');
-      err.classList.add('hidden');
+    sheet.appendRow([
+      id,
+      masa,
+      data.pakej || 'Umrah',
+      data.nama || '',
+      "'" + (data.phone || ''),
+      Number(data.pax) || 1
+    ]);
 
-      if (!pin) return;
-      btn.textContent = 'Memeriksa...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${LIVE_SCRIPT_URL}?action=verifyPin&pin=${encodeURIComponent(pin)}`);
-        const data = await res.json();
-        if (data.status === 'success') {
-          sessionStorage.setItem('azzuha_admin_auth', 'true');
-          hideAuthScreen();
-          initDashboard();
-        } else {
-          err.classList.remove('hidden');
-          document.getElementById('adminPinInput').value = '';
-          document.getElementById('adminPinInput').focus();
-        }
-      } catch (e) {
-        err.textContent = 'Ralat sambungan ke pangkalan data';
-        err.classList.remove('hidden');
-      } finally {
-        btn.textContent = 'Masuk Sistem';
-        btn.disabled = false;
-      }
-    }
-
-    function initDashboard() {
-      updateSessionButtonsUI();
-      updateDayButtonsUI();
-      fetchStats();
-    }
-
-    function normalizeDateString(dateVal) {
-      if (!dateVal) return '';
-      const str = String(dateVal).trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-
-      // Handle DD/MM/YYYY
-      const dmy = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-      if (dmy) {
-        const d = String(dmy[1]).padStart(2, '0');
-        const m = String(dmy[2]).padStart(2, '0');
-        const y = dmy[3];
-        return `${y}-${m}-${d}`;
-      }
-
-      // Handle ISO timestamp format (e.g. 2026-11-06T14:20:00.000Z)
-      if (str.includes('T')) {
-        return str.split('T')[0];
-      }
-
-      const parsed = new Date(str);
-      if (!isNaN(parsed.getTime())) {
-        return parsed.toISOString().split('T')[0];
-      }
-      return str;
-    }
-
-    function getSessionFromTime(timeStr, dateStr) {
-      if (!timeStr) return 'lain';
-      let hours = -1;
-      let minutes = 0;
-      
-      const cleanTime = String(timeStr).trim();
-
-      // Check standard HH:mm:ss or HH:mm AM/PM
-      const timeParts = cleanTime.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
-      if (timeParts) {
-        hours = parseInt(timeParts[1], 10);
-        minutes = parseInt(timeParts[2], 10);
-        const ampm = timeParts[4] ? timeParts[4].toUpperCase() : null;
-        if (ampm === 'PM' && hours < 12) hours += 12;
-        if (ampm === 'AM' && hours === 12) hours = 0;
-      } else {
-        const d = new Date(cleanTime);
-        if (!isNaN(d.getTime())) {
-          hours = d.getHours();
-          minutes = d.getMinutes();
-        }
-      }
-
-      if (hours === -1) return 'lain';
-      const totalMinutes = hours * 60 + minutes;
-      if (totalMinutes >= 10 * 60 && totalMinutes < 15 * 60) return 'pagi';
-      if (totalMinutes >= 15 * 60 && totalMinutes <= 22 * 60) return 'petang';
-      return 'lain';
-    }
-
-    function setDateFilter(filterType) {
-      currentDateFilter = filterType;
-      updateDayButtonsUI();
-      renderFilteredView();
-    }
-
-    function setSessionFilter(session) {
-      currentSessionFilter = session;
-      updateSessionButtonsUI();
-      renderFilteredView();
-    }
-
-    function updateDayButtonsUI() {
-      const btnDay1 = document.getElementById('btnDay1');
-      const btnDay2 = document.getElementById('btnDay2');
-      const btnDay3 = document.getElementById('btnDay3');
-      const btnAll = document.getElementById('btnDayAll');
-      const label = document.getElementById('activeDateLabel');
-
-      const activeClass = 'day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm';
-      const inactiveClass = 'day-filter-btn py-1.5 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 hover:bg-slate-200 text-slate-600';
-
-      if (btnDay1) btnDay1.className = (currentDateFilter === 'day1') ? activeClass : inactiveClass;
-      if (btnDay2) btnDay2.className = (currentDateFilter === 'day2') ? activeClass : inactiveClass;
-      if (btnDay3) btnDay3.className = (currentDateFilter === 'day3') ? activeClass : inactiveClass;
-      if (btnAll) btnAll.className = (currentDateFilter === 'all') ? activeClass : inactiveClass;
-
-      if (label) {
-        if (currentDateFilter === 'day1') label.textContent = 'Hari 1 (06/11)';
-        else if (currentDateFilter === 'day2') label.textContent = 'Hari 2 (07/11)';
-        else if (currentDateFilter === 'day3') label.textContent = 'Hari 3 (08/11)';
-        else label.textContent = 'Semua Hari';
-      }
-    }
-
-    function updateSessionButtonsUI() {
-      const btnAll = document.getElementById('btnSessionAll');
-      const btnPagi = document.getElementById('btnSessionPagi');
-      const btnPetang = document.getElementById('btnSessionPetang');
-
-      const activeClass = 'session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-emerald-600 text-white shadow-sm';
-      const inactiveClass = 'session-filter-btn py-2 px-1 text-center font-bold text-xs rounded-xl transition-all touch-manipulation bg-slate-100 hover:bg-slate-200 text-slate-600';
-
-      if (btnAll) btnAll.className = (currentSessionFilter === 'all') ? activeClass : inactiveClass;
-      if (btnPagi) btnPagi.className = (currentSessionFilter === 'pagi') ? activeClass : inactiveClass;
-      if (btnPetang) btnPetang.className = (currentSessionFilter === 'petang') ? activeClass : inactiveClass;
-    }
-
-    async function fetchStats() {
-      const icon = document.getElementById('refreshIcon');
-      if (icon) icon.classList.add('fa-spin');
-
-      try {
-        const res = await fetch(LIVE_SCRIPT_URL);
-        const data = await res.json();
-        if (data.status === 'success') {
-          cachedLogs = data.recentLogs || [];
-          rawStats = data.stats || rawStats;
-          renderFilteredView();
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
-      } finally {
-        if (icon) icon.classList.remove('fa-spin');
-      }
-    }
-
-    function matchDateFilter(itemDate) {
-      if (currentDateFilter === 'all') return true;
-      const normalized = normalizeDateString(itemDate);
-      if (currentDateFilter === 'day1') return normalized === EVENT_DAYS.day1;
-      if (currentDateFilter === 'day2') return normalized === EVENT_DAYS.day2;
-      if (currentDateFilter === 'day3') return normalized === EVENT_DAYS.day3;
-      return true;
-    }
-
-    function renderFilteredView() {
-      const searchVal = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
-
-      const filteredLogs = cachedLogs.filter(item => {
-        const dateMatch = matchDateFilter(item.date);
-        if (!dateMatch) return false;
-
-        if (currentSessionFilter !== 'all') {
-          const itemSession = getSessionFromTime(item.time, item.date);
-          if (itemSession !== currentSessionFilter) return false;
-        }
-
-        if (searchVal) {
-          const name = (item.name || '').toLowerCase();
-          const phone = (item.phone || '').toLowerCase();
-          return name.includes(searchVal) || phone.includes(searchVal);
-        }
-
-        return true;
-      });
-
-      const countLabel = document.getElementById('sessionCountLabel');
-      const countSubtext = document.getElementById('sessionCountSubtext');
-      const cardIcon = document.getElementById('sessionCardIcon');
-      const listTitle = document.getElementById('listTitle');
-
-      let dayText = 'Semua Hari';
-      if (currentDateFilter === 'day1') dayText = 'Hari 1 (06/11)';
-      else if (currentDateFilter === 'day2') dayText = 'Hari 2 (07/11)';
-      else if (currentDateFilter === 'day3') dayText = 'Hari 3 (08/11)';
-
-      let sessText = 'Semua Sesi';
-      let sessSub = 'Pengunjung';
-      if (currentSessionFilter === 'pagi') {
-        sessText = 'Sesi Pagi (10AM-3PM)';
-        sessSub = 'Pengunjung Pagi';
-        if (cardIcon) cardIcon.className = 'fa-solid fa-sun text-amber-500';
-      } else if (currentSessionFilter === 'petang') {
-        sessText = 'Sesi Petang (3PM-10PM)';
-        sessSub = 'Pengunjung Petang';
-        if (cardIcon) cardIcon.className = 'fa-solid fa-moon text-teal-600';
-      } else {
-        if (cardIcon) cardIcon.className = 'fa-solid fa-calendar-day text-emerald-600';
-      }
-
-      if (countLabel) countLabel.textContent = `${dayText} • ${currentSessionFilter.toUpperCase()}`;
-      if (countSubtext) countSubtext.textContent = sessSub;
-      if (listTitle) listTitle.textContent = `Senarai (${dayText} - ${sessText})`;
-
-      document.getElementById('todayGroups').textContent = filteredLogs.length;
-      document.getElementById('totalGroups').textContent = rawStats.totalGroups || cachedLogs.length;
-      document.getElementById('logCountBadge').textContent = `${filteredLogs.length} rekod`;
-
-      renderRecentLogs(filteredLogs);
-      renderCategoryBreakdown(filteredLogs);
-    }
-
-    function formatWhatsAppLink(phone, name, interest) {
-      let clean = phone.replace(/\D/g, '');
-      if (clean.startsWith('0')) clean = '6' + clean;
-      
-      const visitorName = name ? name.toUpperCase() : 'JEMAAH';
-      let msg = '';
-      
-      if (interest === 'Lain-lain') {
-        msg = `Assalamualaikum Tuan/Puan ${visitorName}, terima kasih kerana singgah ke booth Azzuha Group Travel & Tours. Semoga dipermudahkan urusan. Boleh hubungi kami semula jika ada sebarang pertanyaan ya. `;
-      } else {
-        let topic = 'Umrah';
-        if (interest === 'Haji (P1)') topic = 'Haji';
-        else if (interest === 'Haji (Rayuan)') topic = 'Rayuan Haji';
-        else if (interest === 'Umrah') topic = 'Umrah';
-        else topic = interest;
-
-        msg = `Assalamualaikum Tuan/Puan ${visitorName}, terima kasih kerana singgah ke booth Azzuha Group Travel & Tours. Semoga dipermudahkan urusan. Boleh hubungi kami semula jika ada sebarang pertanyaan berkenaan ${topic}. `;
-      }
-
-      return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(msg)}%F0%9F%98%8A`;
-    }
-
-    function renderRecentLogs(logs) {
-      const container = document.getElementById('recentList');
-      if (!logs || logs.length === 0) {
-        container.innerHTML = '<p class="text-slate-400 text-xs text-center py-6">Tiada rekod untuk tapisan ini.</p>';
-        return;
-      }
-
-      container.innerHTML = logs.map(item => {
-        const displayName = (item.name || 'JEMAAH').toUpperCase();
-        const sessionType = getSessionFromTime(item.time, item.date);
-        
-        let sessionBadge = '';
-        if (sessionType === 'pagi') {
-          sessionBadge = `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded ml-1"><i class="fa-solid fa-sun text-[8px]"></i> Pagi</span>`;
-        } else if (sessionType === 'petang') {
-          sessionBadge = `<span class="bg-teal-100 text-teal-800 text-[9px] font-bold px-1.5 py-0.5 rounded ml-1"><i class="fa-solid fa-moon text-[8px]"></i> Petang</span>`;
-        }
-
-        const waBtn = item.phone ? `
-          <a href="${formatWhatsAppLink(item.phone, displayName, item.interest)}" target="_blank"
-             class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shrink-0 touch-manipulation">
-            <i class="fa-brands fa-whatsapp text-sm text-emerald-600"></i>
-            <span>WhatsApp</span>
-          </a>` : '';
-
-        return `
-          <div class="py-2.5 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-extrabold text-xs shrink-0">
-                <i class="fa-solid fa-user-check"></i>
-              </div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-800 text-xs sm:text-sm truncate uppercase flex items-center">
-                  <span class="truncate">${displayName}</span>
-                  ${sessionBadge}
-                </div>
-                <div class="text-[10px] text-slate-400 truncate mt-0.5">
-                  <span class="font-medium text-slate-500">${item.date || ''}</span> • ${item.time} • <span class="font-semibold text-slate-600">${item.interest}</span>
-                  ${item.phone ? ` • <span class="text-slate-500">${item.phone}</span>` : ''}
-                </div>
-              </div>
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, id: id, tab: sheet.getName() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}</pre>
             </div>
-            <div class="shrink-0">${waBtn}</div>
-          </div>
-        `;
-      }).join('');
-    }
+        </section>
 
-    function renderCategoryBreakdown(logs) {
-      const counts = { Umrah: 0, 'Haji (Rayuan)': 0, 'Haji (P1)': 0, 'Lain-lain': 0 };
-      logs.forEach(l => {
-        let cat = l.interest || 'Lain-lain';
-        if (counts[cat] !== undefined) counts[cat] += 1;
-        else counts['Lain-lain'] += 1;
-      });
+    </main>
 
-      const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
-      const container = document.getElementById('categoryBreakdown');
-      
-      const cats = [
-        { name: 'Umrah', count: counts['Umrah'], color: 'bg-emerald-600' },
-        { name: 'Haji (Rayuan)', count: counts['Haji (Rayuan)'], color: 'bg-teal-600' },
-        { name: 'Haji (P1)', count: counts['Haji (P1)'], color: 'bg-amber-500' },
-        { name: 'Lain-lain', count: counts['Lain-lain'], color: 'bg-slate-500' }
-      ];
+    <script>
+        const KEYS = {
+            API_URL: 'azzuha_simple_api_url',
+            EVENT_NAME: 'azzuha_simple_event_name',
+            DEMO_RECORDS: 'azzuha_simple_demo_records'
+        };
 
-      container.innerHTML = cats.map(c => {
-        const pct = Math.round((c.count / total) * 100);
-        return `
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1">
-              <span class="text-slate-700">${c.name}</span>
-              <span class="text-slate-500">${c.count} (${pct}%)</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full ${c.color} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+        const SAMPLE_RECORDS = [
+            { id: 'AZH-101', timestamp: '13/11/2026 10:15', eventName: 'Ekspo Umrah & Haji 2026', pakej: 'Umrah', nama: 'Hj. Zulkifli bin Musa', phone: '019-9123456', pax: 4 },
+            { id: 'AZH-102', timestamp: '13/11/2026 10:42', eventName: 'Ekspo Umrah & Haji 2026', pakej: 'Haji', nama: 'Pn. Norazlina Omar', phone: '013-9887766', pax: 2 },
+            { id: 'AZH-103', timestamp: '13/11/2026 11:05', eventName: 'Ekspo Umrah & Haji 2026', pakej: 'Umrah', nama: 'En. Mohd Faizal', phone: '012-9001122', pax: 3 }
+        ];
 
-    function exportCSV() {
-      const logsToExport = cachedLogs.filter(item => {
-        const dateMatch = matchDateFilter(item.date);
-        if (!dateMatch) return false;
-        if (currentSessionFilter === 'all') return true;
-        return getSessionFromTime(item.time, item.date) === currentSessionFilter;
-      });
+        const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyTHgxQJSF9TYEinCsLDxROYmfDYoylUUdrY8AdaddF2J7DDg7OqCa0ii-Qjm4RtUja/exec';
 
-      if (!logsToExport || logsToExport.length === 0) {
-        alert('Tiada data untuk dieksport bagi tapisan ini');
-        return;
-      }
-      let csv = 'Timestamp,Date,Time,Session,Name,Phone,Interest,Staff,Notes\n';
-      logsToExport.forEach(r => {
-        const sess = getSessionFromTime(r.time, r.date);
-        const sessName = sess === 'pagi' ? 'Sesi Pagi (10AM-3PM)' : (sess === 'petang' ? 'Sesi Petang (3PM-10PM)' : 'Lain-lain');
-        csv += `"${r.timestamp}","${r.date}","${r.time}","${sessName}","${r.name}","${r.phone}","${r.interest}","${r.staff}","${r.notes}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Azzuha_${currentDateFilter.toUpperCase()}_${currentSessionFilter.toUpperCase()}_Report.csv`;
-      a.click();
-    }
-  </script>
-</body>
-</html>
+        let state = {
+            apiUrl: localStorage.getItem(KEYS.API_URL) || DEFAULT_API_URL,
+            currentEvent: localStorage.getItem(KEYS.EVENT_NAME) || 'Ekspo Umrah & Haji 2026',
+            records: []
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            document.getElementById('config-event-name').value = state.currentEvent;
+            document.getElementById('config-api-url').value = state.apiUrl;
+            initData();
+        });
+
+        function switchTab(tab) {
+            document.getElementById('tab-dashboard').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('tab-setup').classList.toggle('hidden', tab !== 'setup');
+
+            const navDash = document.getElementById('nav-dashboard');
+            const navSetup = document.getElementById('nav-setup');
+
+            if (tab === 'dashboard') {
+                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-azzuha-600 text-white shadow-sm transition-all flex items-center gap-1.5';
+                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
+            } else {
+                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-azzuha-600 text-white shadow-sm transition-all flex items-center gap-1.5';
+                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
+            }
+        }
+// ... existing code ... -->
