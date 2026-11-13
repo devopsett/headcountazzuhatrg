@@ -52,6 +52,29 @@
         </div>
     </div>
 
+    <!-- Modal Pengesahan Nama Event Sudah Wujud -->
+    <div id="duplicate-event-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeDuplicateModal()">
+        <div class="bg-white w-full max-w-xs sm:max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 text-center space-y-4 transform transition-all" onclick="event.stopPropagation()">
+            <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-1.5">
+                <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Nama Event Sudah Wujud</h3>
+                <p id="duplicate-event-message" class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed"></p>
+            </div>
+            <div class="flex flex-col gap-2 pt-1">
+                <button type="button" onclick="confirmUseExistingEvent()"
+                    class="w-full py-3 px-4 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white font-extrabold text-xs sm:text-sm shadow-sm transition-all">
+                    Teruskan &amp; Guna Tab Sedia Ada
+                </button>
+                <button type="button" onclick="closeDuplicateModal()"
+                    class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-all">
+                    Tukar Nama Event Lain
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal / Popup Log Masuk Admin -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-azzuha-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-7 space-y-5">
@@ -280,8 +303,9 @@
                 </div>
 
                 <div class="pt-1 flex justify-end">
-                    <button type="button" onclick="saveSettings()" class="px-5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-sm font-bold shadow-sm transition-colors">
-                        Simpan Tetapan
+                    <button type="button" id="btn-save-settings" onclick="saveSettings(false)" class="px-5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>Simpan Tetapan</span>
                     </button>
                 </div>
             </div>
@@ -314,8 +338,9 @@
                     </div>
 
                     <div class="pt-1 flex justify-end">
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-azzuha-700 hover:bg-azzuha-800 text-white text-sm font-bold shadow-sm transition-colors">
-                            Kemaskini Password
+                        <button type="submit" id="btn-update-pass" class="px-5 py-2.5 rounded-xl bg-azzuha-700 hover:bg-azzuha-800 disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                            <i data-lucide="key-round" class="w-4 h-4"></i>
+                            <span>Kemaskini Password</span>
                         </button>
                     </div>
                 </form>
@@ -345,8 +370,27 @@
             currentEvent: localStorage.getItem(KEYS.EVENT_NAME) || 'Ekspo Umrah & Haji 2026',
             boothOpen: localStorage.getItem(KEYS.BOOTH_OPEN) !== 'false',
             kioskSeconds: parseInt(localStorage.getItem(KEYS.KIOSK_SECONDS) || '0', 10),
+            existingEvents: [],
             records: []
         };
+
+        function setButtonLoading(btnId, isLoading, loadingText) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            if (isLoading) {
+                if (!btn.dataset.originalHtml) {
+                    btn.dataset.originalHtml = btn.innerHTML;
+                }
+                btn.disabled = true;
+                btn.innerHTML = `<svg class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>${loadingText}</span>`;
+            } else {
+                btn.disabled = false;
+                if (btn.dataset.originalHtml) {
+                    btn.innerHTML = btn.dataset.originalHtml;
+                }
+                lucide.createIcons();
+            }
+        }
 
         function getAdminPassword() {
             return localStorage.getItem(KEYS.ADMIN_PASS) || DEFAULT_ADMIN_PASS;
@@ -400,54 +444,59 @@
                 return;
             }
 
-            localStorage.setItem(KEYS.ADMIN_PASS, newPass);
-            document.getElementById('current-admin-pass').value = '';
-            document.getElementById('new-admin-pass').value = '';
-            document.getElementById('confirm-admin-pass').value = '';
-            showToast('Kata laluan Admin baharu telah berjaya dikemaskini.', 'info', 'Password Berjaya Ditukar');
+            setButtonLoading('btn-update-pass', true, 'Mengemaskini...');
+            setTimeout(() => {
+                localStorage.setItem(KEYS.ADMIN_PASS, newPass);
+                document.getElementById('current-admin-pass').value = '';
+                document.getElementById('new-admin-pass').value = '';
+                document.getElementById('confirm-admin-pass').value = '';
+                setButtonLoading('btn-update-pass', false);
+                showToast('Kata laluan Admin baharu telah berjaya dikemaskini.', 'info', 'Password Berjaya Ditukar');
+            }, 450);
         }
 
         function updateBoothToggleLabel() {
             const isOpen = document.getElementById('config-booth-open').checked;
             const desc = document.getElementById('status-booth-desc');
-            desc.textContent = isOpen
-                ? 'Borang pendaftaran DIBUKA untuk jemaah mengisi maklumat.'
-                : 'Borang pendaftaran DITUTUP sementara (jemaah tidak boleh hantar).';
+            if (desc) {
+                desc.textContent = isOpen
+                    ? 'Borang pendaftaran dibuka untuk jemaah mengisi maklumat.'
+                    : 'Borang pendaftaran ditutup. Jemaah akan melihat notis booth ditutup.';
+            }
+        }
+
+        function switchTab(tab) {
+            const dashSec = document.getElementById('tab-dashboard');
+            const setupSec = document.getElementById('tab-setup');
+            const navDash = document.getElementById('nav-dashboard');
+            const navSetup = document.getElementById('nav-setup');
+
+            if (tab === 'setup') {
+                dashSec.classList.add('hidden');
+                setupSec.classList.remove('hidden');
+                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
+                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
+                document.getElementById('config-event-name').value = state.currentEvent;
+                document.getElementById('config-booth-open').checked = state.boothOpen;
+                document.getElementById('config-kiosk-seconds').value = String(state.kioskSeconds);
+                updateBoothToggleLabel();
+            } else {
+                setupSec.classList.add('hidden');
+                dashSec.classList.remove('hidden');
+                navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
+                navSetup.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
+            }
+            lucide.createIcons();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            document.getElementById('config-event-name').value = state.currentEvent;
-            document.getElementById('config-booth-open').checked = state.boothOpen;
-            document.getElementById('config-kiosk-seconds').value = String(state.kioskSeconds);
-            updateBoothToggleLabel();
-
             if (sessionStorage.getItem(KEYS.ADMIN_AUTH) === 'true') {
                 unlockAdminPanel();
-            } else {
-                document.getElementById('login-username').focus();
             }
         });
 
-        function switchTab(tab) {
-            const tabs = ['dashboard', 'setup'];
-            tabs.forEach(t => {
-                const section = document.getElementById(`tab-${t}`);
-                const btn = document.getElementById(`nav-${t}`);
-                if (t === tab) {
-                    section.classList.remove('hidden');
-                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-azzuha-900 shadow-sm transition-all flex items-center gap-1.5';
-                } else {
-                    section.classList.add('hidden');
-                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-azzuha-100 hover:text-white transition-all flex items-center gap-1.5';
-                }
-            });
-            if (tab === 'dashboard') {
-                renderDashboard();
-            }
-        }
-
-        async function saveSettings() {
+        async function saveSettings(forceOverwrite = false) {
             const eventName = document.getElementById('config-event-name').value.trim();
             const boothOpen = document.getElementById('config-booth-open').checked;
             const kioskSeconds = parseInt(document.getElementById('config-kiosk-seconds').value, 10) || 0;
@@ -457,37 +506,87 @@
                 return;
             }
 
-            state.currentEvent = eventName;
-            state.boothOpen = boothOpen;
-            state.kioskSeconds = kioskSeconds;
+            const isDifferentFromActive = eventName.toLowerCase() !== state.currentEvent.toLowerCase();
+            const alreadyInLocalList = state.existingEvents.some(ev => ev.toLowerCase() === eventName.toLowerCase()) ||
+                                       state.records.some(r => String(r.event).toLowerCase() === eventName.toLowerCase());
 
-            localStorage.setItem(KEYS.EVENT_NAME, eventName);
-            localStorage.setItem(KEYS.BOOTH_OPEN, String(boothOpen));
-            localStorage.setItem(KEYS.KIOSK_SECONDS, String(kioskSeconds));
+            if (!forceOverwrite && isDifferentFromActive && alreadyInLocalList) {
+                showDuplicateModal(eventName);
+                return;
+            }
 
-            if (state.apiUrl) {
-                try {
-                    await fetch(state.apiUrl, {
+            setButtonLoading('btn-save-settings', true, 'Menyimpan...');
+
+            try {
+                if (state.apiUrl) {
+                    const res = await fetch(state.apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({
                             action: 'set_event',
                             eventName: eventName,
                             boothOpen: boothOpen,
-                            kioskSeconds: kioskSeconds
+                            kioskSeconds: kioskSeconds,
+                            checkDuplicate: !forceOverwrite && isDifferentFromActive
                         })
                     });
-                    showToast('Tetapan event dan operasi booth telah berjaya disimpan.', 'info', 'Tetapan Berjaya Disimpan');
-                } catch (err) {
-                    console.error(err);
-                    showToast('Tetapan disimpan secara lokal, tetapi gagal menyelaraskan ke Google Sheet.', 'error', 'Ralat Penyelarasan');
-                }
-            } else {
-                showToast('Tetapan event dan operasi booth telah berjaya disimpan.', 'info', 'Tetapan Berjaya Disimpan');
-            }
+                    const data = await res.json();
 
-            initData();
-            switchTab('dashboard');
+                    if (data && data.duplicate) {
+                        setButtonLoading('btn-save-settings', false);
+                        showDuplicateModal(eventName);
+                        return;
+                    }
+
+                    state.currentEvent = eventName;
+                    state.boothOpen = boothOpen;
+                    state.kioskSeconds = kioskSeconds;
+                    localStorage.setItem(KEYS.EVENT_NAME, eventName);
+                    localStorage.setItem(KEYS.BOOTH_OPEN, String(boothOpen));
+                    localStorage.setItem(KEYS.KIOSK_SECONDS, String(kioskSeconds));
+
+                    if (!state.existingEvents.includes(eventName)) {
+                        state.existingEvents.push(eventName);
+                    }
+
+                    setButtonLoading('btn-save-settings', false);
+                    showToast('Tetapan event dan operasi booth telah berjaya disimpan.', 'info', 'Tetapan Berjaya Disimpan');
+                } else {
+                    state.currentEvent = eventName;
+                    state.boothOpen = boothOpen;
+                    state.kioskSeconds = kioskSeconds;
+                    localStorage.setItem(KEYS.EVENT_NAME, eventName);
+                    localStorage.setItem(KEYS.BOOTH_OPEN, String(boothOpen));
+                    localStorage.setItem(KEYS.KIOSK_SECONDS, String(kioskSeconds));
+                    setButtonLoading('btn-save-settings', false);
+                    showToast('Tetapan event dan operasi booth telah berjaya disimpan.', 'info', 'Tetapan Berjaya Disimpan');
+                }
+
+                initData();
+                switchTab('dashboard');
+            } catch (err) {
+                console.error(err);
+                setButtonLoading('btn-save-settings', false);
+                showToast('Gagal menyelaraskan tetapan ke Google Sheet. Sila semak sambungan internet.', 'error', 'Ralat Penyelarasan');
+            }
+        }
+
+        function showDuplicateModal(eventName) {
+            document.getElementById('duplicate-event-message').textContent =
+                `Tab bernama "${eventName}" sudah wujud di dalam Google Sheet. Rekod baharu akan disambung ke dalam tab sedia ada tersebut.`;
+            document.getElementById('duplicate-event-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeDuplicateModal() {
+            document.getElementById('duplicate-event-modal').classList.add('hidden');
+            const input = document.getElementById('config-event-name');
+            if (input) input.focus();
+        }
+
+        function confirmUseExistingEvent() {
+            document.getElementById('duplicate-event-modal').classList.add('hidden');
+            saveSettings(true);
         }
 
         function initData() {
@@ -513,6 +612,9 @@
                 if (data.success && Array.isArray(data.records)) {
                     // Tapis keluar sebarang baris konfigurasi (_CONFIG) supaya tidak dikira sebagai pax
                     state.records = data.records.filter(r => r.event && r.event !== '_CONFIG' && r.nama);
+                    if (Array.isArray(data.sheetNames)) {
+                        state.existingEvents = data.sheetNames.filter(n => n && n !== '_CONFIG');
+                    }
                     if (data.activeEvent) {
                         state.currentEvent = data.activeEvent;
                         localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
@@ -544,7 +646,7 @@
         function populateEventDropdown() {
             const select = document.getElementById('filter-event-select');
             const previousVal = select.value;
-            const eventSet = new Set([state.currentEvent]);
+            const eventSet = new Set([state.currentEvent, ...state.existingEvents]);
             state.records.forEach(r => {
                 if (r.event && r.event !== '_CONFIG') eventSet.add(r.event);
             });
