@@ -124,7 +124,9 @@
                 <div>
                     <label for="input-phone" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">3. No. Telefon (WhatsApp) *</label>
                     <input type="tel" id="input-phone" required placeholder="Contoh: 019-9876543" autocomplete="tel"
+                        onblur="this.value = normalizeMYPhone(this.value)"
                         class="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-base font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500 focus:border-azzuha-500 transition-all">
+                    <p class="text-[11px] text-slate-400 mt-1">Akan diseragamkan secara automatik ke format 601XXXXXXXX.</p>
                 </div>
 
                 <!-- 4. BERAPA PAX -->
@@ -275,6 +277,18 @@
             input.value = val;
         }
 
+        // A2: Pembersihan & Penyeragaman Automatik No. Telefon Malaysia (601...)
+        function normalizeMYPhone(raw) {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (!digits) return '';
+            if (digits.startsWith('0')) {
+                digits = '6' + digits;
+            } else if (digits.startsWith('1')) {
+                digits = '60' + digits;
+            }
+            return digits;
+        }
+
         async function submitJemaah(e) {
             e.preventDefault();
             if (!state.isOpen) {
@@ -289,11 +303,21 @@
             }
             const pakej = pakejEl.value.toUpperCase();
             const nama = document.getElementById('input-nama').value.trim().toUpperCase();
-            const phone = document.getElementById('input-phone').value.trim().toUpperCase();
+            const phoneInput = document.getElementById('input-phone');
+            const phone = normalizeMYPhone(phoneInput.value);
+            phoneInput.value = phone;
             const pax = Math.max(1, parseInt(document.getElementById('input-pax').value, 10) || 1);
 
-            if (!nama || !phone) {
-                showToast('Sila lengkapkan Nama Jemaah dan No. Telefon.', 'error');
+            if (!nama || phone.length < 10) {
+                showToast('Sila lengkapkan Nama Jemaah dan No. Telefon yang sah.', 'error');
+                return;
+            }
+
+            // A3: Semakan Pendua Tempatan (elak klik dua kali berturut-turut)
+            const recentKey = `azzuha_recent_${state.currentEvent}_${phone}`;
+            const lastSubmit = parseInt(localStorage.getItem(recentKey) || '0', 10);
+            if (Date.now() - lastSubmit < 180000) {
+                showToast('No. telefon ini baru sahaja didaftarkan untuk event ini.', 'error');
                 return;
             }
 
@@ -326,13 +350,23 @@
                             applyBoothStatus();
                             return;
                         }
+                        if (data.duplicate) {
+                            showToast(data.error || 'No. telefon ini sudah berdaftar bagi event ini.', 'error');
+                            return;
+                        }
                         throw new Error(data.error || 'Gagal menyimpan');
                     }
                 } else {
                     const existing = JSON.parse(localStorage.getItem(KEYS.DEMO_RECORDS) || '[]');
+                    if (existing.some(r => r.event === state.currentEvent && r.phone === phone)) {
+                        showToast('No. telefon ini sudah berdaftar bagi event ini.', 'error');
+                        return;
+                    }
                     existing.unshift(record);
                     localStorage.setItem(KEYS.DEMO_RECORDS, JSON.stringify(existing));
                 }
+
+                localStorage.setItem(recentKey, String(Date.now()));
 
                 document.getElementById('form-card').classList.add('hidden');
                 const successCard = document.getElementById('success-card');
