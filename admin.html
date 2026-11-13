@@ -344,4 +344,276 @@ function doPost(e) {
                 navDash.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
             }
         }
-// ... existing code ... -->
+
+        function initData() {
+            const badge = document.getElementById('sync-badge');
+            if (state.apiUrl) {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 shrink-0';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Live';
+                syncData(false);
+            } else {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 shrink-0';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Demo';
+                const saved = localStorage.getItem(KEYS.DEMO_RECORDS);
+                state.records = saved ? JSON.parse(saved) : [...SAMPLE_RECORDS];
+                populateEventDropdown();
+                renderDashboard();
+            }
+        }
+
+        async function syncData(manual) {
+            if (!state.apiUrl) {
+                initData();
+                if (manual) showToast('Mod Demo aktif.', 'info');
+                return;
+            }
+
+            const icon = document.getElementById('sync-icon');
+            if (icon) icon.classList.add('animate-spin');
+
+            try {
+                const res = await fetch(state.apiUrl);
+                const data = await res.json();
+                if (data.success && Array.isArray(data.records)) {
+                    state.records = data.records;
+                    if (data.activeEvent) {
+                        state.currentEvent = data.activeEvent;
+                        localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
+                        document.getElementById('config-event-name').value = state.currentEvent;
+                    }
+                    populateEventDropdown();
+                    renderDashboard();
+                    if (manual) showToast('Data headcount dikemas kini!', 'info');
+                }
+            } catch (err) {
+                console.error(err);
+                if (manual) showToast('Gagal membaca data Google Sheet.', 'error');
+            } finally {
+                if (icon) icon.classList.remove('animate-spin');
+            }
+        }
+
+        function populateEventDropdown() {
+            const select = document.getElementById('filter-event-select');
+            const prev = select.value;
+
+            const eventSet = new Set([state.currentEvent]);
+            state.records.forEach(r => {
+                if (r.eventName) eventSet.add(r.eventName);
+            });
+
+            let html = `<option value="__ALL__">Semua Event (${state.records.length} rekod)</option>`;
+            eventSet.forEach(ev => {
+                const label = ev === state.currentEvent ? `${ev} (Aktif)` : ev;
+                html += `<option value="${escapeHtml(ev)}">${escapeHtml(label)}</option>`;
+            });
+
+            select.innerHTML = html;
+            if (prev && (prev === '__ALL__' || eventSet.has(prev))) {
+                select.value = prev;
+            } else {
+                select.value = state.currentEvent;
+            }
+        }
+
+        function renderDashboard() {
+            const selectedEvent = document.getElementById('filter-event-select').value;
+            const search = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+            const byEvent = selectedEvent === '__ALL__'
+                ? state.records
+                : state.records.filter(r => r.eventName === selectedEvent);
+
+            let totalPax = 0, umrahPax = 0, umrahRekod = 0, hajiPax = 0, hajiRekod = 0;
+
+            byEvent.forEach(r => {
+                const pax = Number(r.pax) || 1;
+                totalPax += pax;
+                if (r.pakej === 'Haji') {
+                    hajiPax += pax;
+                    hajiRekod++;
+                } else {
+                    umrahPax += pax;
+                    umrahRekod++;
+                }
+            });
+
+            document.getElementById('stat-total-pax').textContent = totalPax;
+            document.getElementById('stat-total-rekod').textContent = `${byEvent.length} rekod`;
+            document.getElementById('stat-umrah-pax').textContent = umrahPax;
+            document.getElementById('stat-umrah-rekod').textContent = `${umrahRekod} keluarga`;
+            document.getElementById('stat-haji-pax').textContent = hajiPax;
+            document.getElementById('stat-haji-rekod').textContent = `${hajiRekod} keluarga`;
+
+            const filtered = byEvent.filter(r => {
+                if (!search) return true;
+                return (r.nama || '').toLowerCase().includes(search) ||
+                       (r.phone || '').toLowerCase().includes(search);
+            });
+
+            const listEl = document.getElementById('jemaah-list');
+            const emptyEl = document.getElementById('empty-list');
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            listEl.innerHTML = filtered.map(r => {
+                const isHaji = r.pakej === 'Haji';
+                const badgeClass = isHaji
+                    ? 'bg-amber-100 text-amber-800 border-amber-200'
+                    : 'bg-azzuha-100 text-azzuha-800 border-azzuha-200';
+
+                return `
+                    <div class="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold border ${badgeClass}">${escapeHtml(r.pakej)}</span>
+                                <h4 class="font-bold text-slate-900 text-sm truncate">${escapeHtml(r.nama)}</h4>
+                            </div>
+                            <div class="flex items-center gap-3 mt-1 text-xs text-slate-500 flex-wrap">
+                                <span>${escapeHtml(r.phone)}</span>
+                                <span>•</span>
+                                <span>${escapeHtml(r.timestamp)}</span>
+                                ${selectedEvent === '__ALL__' ? `<span class="text-azzuha-700 font-medium">• ${escapeHtml(r.eventName)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0 bg-slate-100 px-3 py-1.5 rounded-xl">
+                            <span class="text-base font-extrabold text-slate-900 block leading-none">${Number(r.pax) || 1}</span>
+                            <span class="text-[10px] font-semibold text-slate-500 uppercase">Pax</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function saveSettings() {
+            const eventName = document.getElementById('config-event-name').value.trim();
+            const apiUrl = document.getElementById('config-api-url').value.trim();
+
+            if (!eventName) {
+                showToast('Sila masukkan Nama Event Booth.', 'error');
+                return;
+            }
+
+            state.currentEvent = eventName;
+            state.apiUrl = apiUrl;
+
+            localStorage.setItem(KEYS.EVENT_NAME, eventName);
+            localStorage.setItem(KEYS.API_URL, apiUrl);
+
+            if (apiUrl) {
+                try {
+                    await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'set_event', eventName: eventName })
+                    });
+                    showToast(`Tab "${eventName}" dicipta di Google Sheet & tetapan disimpan!`, 'info');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Tetapan disimpan, tetapi gagal mencipta tab di Google Sheet.', 'error');
+                }
+            } else {
+                showToast('Tetapan berjaya disimpan!', 'info');
+            }
+
+            initData();
+            switchTab('dashboard');
+        }
+
+        function resetDemoData() {
+            localStorage.setItem(KEYS.DEMO_RECORDS, JSON.stringify(SAMPLE_RECORDS));
+            if (!state.apiUrl) {
+                state.records = [...SAMPLE_RECORDS];
+                populateEventDropdown();
+                renderDashboard();
+            }
+            showToast('Data demo ditetapkan semula.', 'info');
+        }
+
+        function exportCSV() {
+            const selectedEvent = document.getElementById('filter-event-select').value;
+            const rowsToExport = selectedEvent === '__ALL__'
+                ? state.records
+                : state.records.filter(r => r.eventName === selectedEvent);
+
+            if (rowsToExport.length === 0) {
+                showToast('Tiada data untuk dimuat turun.', 'error');
+                return;
+            }
+
+            const headers = ['ID', 'Tarikh_Masa', 'Nama_Event', 'Pakej', 'Nama_Jemaah', 'No_Telefon', 'Pax'];
+            const csvLines = [headers.join(',')];
+
+            rowsToExport.forEach(r => {
+                const row = [
+                    r.id,
+                    r.timestamp,
+                    r.eventName,
+                    r.pakej,
+                    `"${(r.nama || '').replace(/"/g, '""')}"`,
+                    `"${(r.phone || '').replace(/"/g, '""')}"`,
+                    r.pax
+                ];
+                csvLines.push(row.join(','));
+            });
+
+            const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Headcount_Azzuha_${selectedEvent === '__ALL__' ? 'Semua' : selectedEvent.replace(/\s+/g, '_')}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyScript() {
+            const text = document.getElementById('apps-script-box').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const btn = document.getElementById('btn-copy-script');
+            btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Disalin!';
+            lucide.createIcons();
+            showToast('Kod Google Apps Script berjaya disalin!', 'info');
+            setTimeout(() => {
+                btn.innerHTML = '<i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Kod';
+                lucide.createIcons();
+            }, 2500);
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
+            toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-lg text-xs font-semibold pointer-events-auto transition-all`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 250);
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
