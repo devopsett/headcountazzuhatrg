@@ -61,32 +61,9 @@
     <main class="flex-1 max-w-xl w-full mx-auto px-4 py-6 space-y-5">
 
         <!-- Kad Event Semasa -->
-        <div class="bg-gradient-to-r from-azzuha-800 to-azzuha-600 rounded-2xl p-5 text-white shadow-md flex items-center justify-between gap-3">
-            <div class="min-w-0">
-                <span class="text-[11px] uppercase tracking-wider font-semibold text-azzuha-100 block">Event Aktif Semasa</span>
-                <h2 id="banner-event-name" class="text-lg sm:text-xl font-extrabold leading-snug mt-0.5 truncate">Ekspo Umrah & Haji 2026</h2>
-            </div>
-            <button type="button" onclick="toggleEditEvent()" class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all" title="Tukar Nama Event & Cipta Tab Sheet">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                <span>Tukar Event</span>
-            </button>
-        </div>
-
-        <!-- Panel Pantas Tukar Nama Event (Terus Cipta Tab Baru di Google Sheet) -->
-        <div id="edit-event-box" class="hidden bg-white rounded-2xl border border-azzuha-200 shadow-sm p-4 space-y-3">
-            <div class="flex items-center justify-between">
-                <label for="quick-event-input" class="text-xs font-bold uppercase tracking-wider text-azzuha-800">Nama Event Baharu (Auto-Cipta Tab Sheet)</label>
-                <button type="button" onclick="toggleEditEvent()" class="text-xs text-slate-400 hover:text-slate-600 font-semibold">Tutup</button>
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="quick-event-input" placeholder="Contoh: Ekspo Terengganu 2026"
-                    class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
-                <button type="button" id="btn-save-event" onclick="simpanEventBaharu()"
-                    class="px-4 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-xs font-bold shrink-0 shadow-sm">
-                    Cipta Tab
-                </button>
-            </div>
-            <p class="text-[11px] text-slate-500">Menekan <strong>Cipta Tab</strong> akan terus mencipta tab baharu berserta header di dalam Google Sheet anda.</p>
+        <div class="bg-gradient-to-r from-azzuha-800 to-azzuha-600 rounded-2xl p-5 text-white shadow-md">
+            <span class="text-[11px] uppercase tracking-wider font-semibold text-azzuha-100 block">Event Aktif Semasa</span>
+            <h2 id="banner-event-name" class="text-lg sm:text-xl font-extrabold leading-snug mt-0.5 truncate">Ekspo Umrah & Haji 2026</h2>
         </div>
 
         <!-- Borang Pendaftaran Jemaah -->
@@ -200,14 +177,13 @@
         window.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
             document.getElementById('banner-event-name').textContent = state.currentEvent;
-            document.getElementById('quick-event-input').value = state.currentEvent;
 
             const badge = document.getElementById('sync-badge');
             if (state.apiUrl) {
                 badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 shrink-0';
                 badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Live';
 
-                // Semak nama event semasa daripada Google Sheet jika ditetapkan
+                // Semak nama event semasa daripada Google Sheet yang ditetapkan oleh Admin
                 try {
                     const res = await fetch(state.apiUrl);
                     const data = await res.json();
@@ -215,56 +191,12 @@
                         state.currentEvent = data.activeEvent;
                         localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
                         document.getElementById('banner-event-name').textContent = state.currentEvent;
-                        document.getElementById('quick-event-input').value = state.currentEvent;
                     }
                 } catch (err) {
                     console.error(err);
                 }
             }
         });
-
-        function toggleEditEvent() {
-            const box = document.getElementById('edit-event-box');
-            box.classList.toggle('hidden');
-            if (!box.classList.contains('hidden')) {
-                document.getElementById('quick-event-input').focus();
-            }
-        }
-
-        async function simpanEventBaharu() {
-            const input = document.getElementById('quick-event-input');
-            const namaEvent = input.value.trim();
-            if (!namaEvent) {
-                showToast('Sila masukkan nama event dahulu.', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('btn-save-event');
-            btn.disabled = true;
-            btn.textContent = 'Mencipta...';
-
-            state.currentEvent = namaEvent;
-            localStorage.setItem(KEYS.EVENT_NAME, namaEvent);
-            document.getElementById('banner-event-name').textContent = namaEvent;
-
-            if (state.apiUrl) {
-                try {
-                    await fetch(state.apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'set_event', eventName: namaEvent })
-                    });
-                    showToast(`Tab "${namaEvent}" berjaya dicipta di Google Sheet!`, 'info');
-                } catch (err) {
-                    console.error(err);
-                    showToast('Ralat mencipta tab di Google Sheet.', 'error');
-                }
-            }
-
-            btn.disabled = false;
-            btn.textContent = 'Cipta Tab';
-            document.getElementById('edit-event-box').classList.add('hidden');
-        }
 
         function ubahPax(delta) {
             const input = document.getElementById('input-pax');
