@@ -79,7 +79,7 @@
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">1. Pilihan Pakej *</label>
                     <div class="grid grid-cols-2 gap-3">
                         <label class="cursor-pointer">
-                            <input type="radio" name="pakej" value="Umrah" checked class="peer sr-only">
+                            <input type="radio" name="pakej" value="Umrah" required class="peer sr-only">
                             <div class="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50/60 peer-checked:border-azzuha-600 peer-checked:bg-azzuha-50 peer-checked:text-azzuha-900 text-center transition-all active:scale-95">
                                 <div class="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center mx-auto mb-2 text-azzuha-600">
                                     <!-- Ikon Kaabah SVG -->
@@ -95,7 +95,7 @@
                         </label>
 
                         <label class="cursor-pointer">
-                            <input type="radio" name="pakej" value="Haji" class="peer sr-only">
+                            <input type="radio" name="pakej" value="Haji" required class="peer sr-only">
                             <div class="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50/60 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-950 text-center transition-all active:scale-95">
                                 <div class="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center mx-auto mb-2 text-amber-600">
                                     <!-- Ikon Masjid / Kubah SVG -->
@@ -283,7 +283,11 @@
             }
 
             const pakejEl = document.querySelector('input[name="pakej"]:checked');
-            const pakej = (pakejEl ? pakejEl.value : 'Umrah').toUpperCase();
+            if (!pakejEl) {
+                showToast('Sila pilih Pakej Umrah atau Haji terlebih dahulu.', 'error');
+                return;
+            }
+            const pakej = pakejEl.value.toUpperCase();
             const nama = document.getElementById('input-nama').value.trim().toUpperCase();
             const phone = document.getElementById('input-phone').value.trim().toUpperCase();
             const pax = Math.max(1, parseInt(document.getElementById('input-pax').value, 10) || 1);
