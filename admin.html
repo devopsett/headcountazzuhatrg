@@ -75,6 +75,71 @@
         </div>
     </div>
 
+    <!-- Modal Edit Rekod Jemaah (B3) -->
+    <div id="edit-record-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeEditModal()">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-slate-900">Kemaskini Rekod Jemaah</h3>
+                <button type="button" onclick="closeEditModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form onsubmit="submitEditRecord(event)" class="space-y-3.5">
+                <input type="hidden" id="edit-record-id">
+                <input type="hidden" id="edit-record-event">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Pakej</label>
+                    <select id="edit-record-pakej" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold">
+                        <option value="UMRAH">UMRAH</option>
+                        <option value="HAJI">HAJI</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Jemaah</label>
+                    <input type="text" id="edit-record-nama" required oninput="this.value = this.value.toUpperCase()"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold uppercase">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">No. Telefon</label>
+                        <input type="tel" id="edit-record-phone" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Bilangan Pax</label>
+                        <input type="number" id="edit-record-pax" min="1" max="100" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-extrabold text-center">
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Batal</button>
+                    <button type="submit" id="btn-save-edit" class="flex-1 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5">
+                        <span>Simpan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Pengesahan Padam Rekod (B3) -->
+    <div id="delete-record-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeDeleteModal()">
+        <div class="bg-white w-full max-w-xs sm:max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 text-center space-y-4" onclick="event.stopPropagation()">
+            <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+                <i data-lucide="trash-2" class="w-7 h-7"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-base font-extrabold text-slate-900">Padam Rekod Jemaah?</h3>
+                <p id="delete-record-message" class="text-xs sm:text-sm text-slate-600 font-medium"></p>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Batal</button>
+                <button type="button" id="btn-confirm-delete" onclick="confirmDeleteRecord()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5">
+                    <span>Ya, Padam</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal / Popup Log Masuk Admin -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-azzuha-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-7 space-y-5">
@@ -243,15 +308,39 @@
 
             <!-- Senarai Rekod Jemaah -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-900">Senarai Pendaftaran Jemaah</h3>
-                        <p class="text-xs text-slate-500">Rekod terkini yang dihantar dari borang jemaah</p>
+                <div class="p-4 border-b border-slate-100 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-extrabold text-slate-900">Senarai Pendaftaran Jemaah</h3>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-azzuha-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Auto-Sync 10s
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500">Rekod terkini yang dihantar dari borang jemaah</p>
+                        </div>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="search-input" oninput="renderDashboard()" placeholder="Cari nama / no. telefon..."
+                                class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+                        </div>
                     </div>
-                    <div class="relative w-full sm:w-64">
-                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                        <input type="text" id="search-input" oninput="renderDashboard()" placeholder="Cari nama / no. telefon..."
-                            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-azzuha-500">
+
+                    <!-- B2: Penapis Mengikut Pakej -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                        <button type="button" onclick="setPakejFilter('ALL')" id="filter-pkg-ALL"
+                            class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-azzuha-600 text-white shadow-xs transition-all">
+                            Semua Pakej
+                        </button>
+                        <button type="button" onclick="setPakejFilter('UMRAH')" id="filter-pkg-UMRAH"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">
+                            Umrah Sahaja
+                        </button>
+                        <button type="button" onclick="setPakejFilter('HAJI')" id="filter-pkg-HAJI"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">
+                            Haji Sahaja
+                        </button>
                     </div>
                 </div>
 
@@ -379,11 +468,15 @@
             currentEvent: localStorage.getItem(KEYS.EVENT_NAME) || 'Ekspo Umrah & Haji 2026',
             boothOpen: localStorage.getItem(KEYS.BOOTH_OPEN) !== 'false',
             kioskSeconds: parseInt(localStorage.getItem(KEYS.KIOSK_SECONDS) || '0', 10),
+            pakejFilter: 'ALL',
             existingEvents: [],
             records: []
         };
 
-        function setButtonLoading(btnId, isLoading, loadingText) {
+        let autoSyncInterval = null;
+        let pendingDeleteTarget = null;
+
+        function setButtonLoading(btnId, isLoading, loadingText = 'Menyimpan...') {
             const btn = document.getElementById(btnId);
             if (!btn) return;
             if (isLoading) {
@@ -429,6 +522,10 @@
 
         function logoutAdmin() {
             sessionStorage.removeItem(KEYS.ADMIN_AUTH);
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+                autoSyncInterval = null;
+            }
             document.getElementById('admin-app').classList.add('hidden');
             document.getElementById('login-modal').classList.remove('hidden');
             document.getElementById('login-password').value = '';
@@ -606,15 +703,24 @@
 
             if (state.apiUrl) {
                 syncData(false);
+                // B4: Auto-Refresh Live setiap 10 saat ketika Admin log masuk
+                if (autoSyncInterval) clearInterval(autoSyncInterval);
+                autoSyncInterval = setInterval(() => {
+                    if (sessionStorage.getItem(KEYS.ADMIN_AUTH) === 'true' && !document.hidden) {
+                        syncData(false, true);
+                    }
+                }, 10000);
             }
         }
 
-        async function syncData(manual = false) {
+        async function syncData(manual = false, silent = false) {
             if (!state.apiUrl) return;
             const icon = document.getElementById('sync-icon');
             const btn = document.getElementById('btn-refresh');
-            if (icon) icon.classList.add('animate-spin');
-            if (btn) btn.disabled = true;
+            if (!silent) {
+                if (icon) icon.classList.add('animate-spin');
+                if (btn) btn.disabled = true;
+            }
 
             try {
                 // Gunakan parameter masa (?t=) supaya pelayar sentiasa tarik data segar dari Google Sheet
@@ -650,8 +756,10 @@
                 console.error(err);
                 if (manual) showToast('Gagal menyambung ke Google Sheet.', 'error');
             } finally {
-                if (icon) icon.classList.remove('animate-spin');
-                if (btn) btn.disabled = false;
+                if (!silent) {
+                    if (icon) icon.classList.remove('animate-spin');
+                    if (btn) btn.disabled = false;
+                }
             }
         }
 
@@ -716,13 +824,18 @@
             document.getElementById('stat-haji-pax').textContent = hajiPax;
             document.getElementById('stat-haji-rekod').textContent = `${hajiRekod} keluarga`;
 
+            // B2: Tapis mengikut pilihan Pakej (ALL / UMRAH / HAJI)
+            const pkgFiltered = state.pakejFilter === 'ALL'
+                ? eventRecords
+                : eventRecords.filter(r => String(r.pakej).toUpperCase() === state.pakejFilter);
+
             const filtered = query
-                ? eventRecords.filter(r =>
+                ? pkgFiltered.filter(r =>
                     String(r.nama).toLowerCase().includes(query) ||
                     String(r.phone).toLowerCase().includes(query) ||
                     String(r.id).toLowerCase().includes(query)
                 )
-                : eventRecords;
+                : pkgFiltered;
 
             const listEl = document.getElementById('jemaah-list');
             const emptyEl = document.getElementById('empty-list');
@@ -742,9 +855,10 @@
                 const timeText = r.timestamp
                     ? new Date(r.timestamp).toLocaleString('ms-MY', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
                     : '';
+                const waUrl = buildWhatsAppUrl(r);
 
                 return `
-                    <div class="p-4 hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-3">
+                    <div class="p-4 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="font-extrabold text-sm text-slate-900 truncate">${escapeHtml(r.nama)}</span>
@@ -753,19 +867,159 @@
                                 </span>
                             </div>
                             <div class="flex items-center gap-3 text-xs text-slate-500 mt-1 flex-wrap">
-                                <span>${escapeHtml(r.phone)}</span>
+                                <span class="font-semibold text-slate-600">${escapeHtml(r.phone)}</span>
                                 ${timeText ? `<span>• ${timeText}</span>` : ''}
                                 ${selectedEvent === 'ALL' ? `<span class="text-azzuha-700 font-semibold">• ${escapeHtml(r.event)}</span>` : ''}
                             </div>
                         </div>
-                        <div class="shrink-0 text-right">
+                        <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                             <span class="inline-flex items-center px-3 py-1 rounded-xl bg-azzuha-600 text-white text-xs font-extrabold shadow-xs">
                                 ${parseInt(r.pax, 10) || 1} Pax
                             </span>
+                            <div class="flex items-center gap-1.5">
+                                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Jemaah"
+                                    class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold inline-flex items-center gap-1 transition-colors">
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                                    <span>WhatsApp</span>
+                                </a>
+                                <button type="button" onclick="openEditModal('${escapeHtml(r.id)}', '${escapeHtml(r.event)}')" title="Edit Rekod"
+                                    class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button type="button" onclick="openDeleteModal('${escapeHtml(r.id)}', '${escapeHtml(r.event)}', '${escapeHtml(r.nama)}')" title="Padam Rekod"
+                                    class="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
+            lucide.createIcons();
+        }
+
+        // B2: Fungsi Tukar Penapis Pakej
+        function setPakejFilter(pkg) {
+            state.pakejFilter = pkg;
+            ['ALL', 'UMRAH', 'HAJI'].forEach(key => {
+                const btn = document.getElementById(`filter-pkg-${key}`);
+                if (!btn) return;
+                if (key === pkg) {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-azzuha-600 text-white shadow-xs transition-all';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all';
+                }
+            });
+            renderDashboard();
+        }
+
+        // B1: Bina Pautan WhatsApp Susulan Rasmi Azzuha
+        function buildWhatsAppUrl(r) {
+            let digits = String(r.phone || '').replace(/\D/g, '');
+            if (digits.startsWith('0')) digits = '6' + digits;
+            else if (digits.startsWith('1')) digits = '60' + digits;
+
+            const pakejRaw = String(r.pakej || 'Umrah').trim().toLowerCase();
+            const pakejTitle = pakejRaw.charAt(0).toUpperCase() + pakejRaw.slice(1);
+
+            const msg = `Assalamualaikum Tuan/Puan ${r.nama} 😊\n\nTerima kasih kerana sudi mengunjungi booth Azzuha Group Travel & Tours (Cawangan Terengganu) sempena ${r.event}.\n\nUntuk makluman, kami telah menerima maklumat minat Tuan/Puan bagi Pakej ${pakejTitle} (${r.pax} Pax).\n\nSekiranya Tuan/Puan berminat atau ingin mengetahui lebih lanjut mengenai pakej ${pakejRaw} yang ditawarkan, boleh terus WhatsApp saya. Insya-Allah, saya sedia membantu memberikan penerangan dan maklumat lanjut.\n\nTerima kasih atas minat dan kepercayaan Tuan/Puan. Semoga Allah SWT mempermudahkan segala urusan kita untuk menjadi tetamu-Nya. 🤲`;
+            return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
+        }
+
+        // B3: Edit Rekod Jemaah
+        function openEditModal(id, eventName) {
+            const rec = state.records.find(r => r.id === id && r.event === eventName);
+            if (!rec) return;
+            document.getElementById('edit-record-id').value = rec.id;
+            document.getElementById('edit-record-event').value = rec.event;
+            document.getElementById('edit-record-pakej').value = String(rec.pakej || 'UMRAH').toUpperCase();
+            document.getElementById('edit-record-nama').value = rec.nama;
+            document.getElementById('edit-record-phone').value = rec.phone;
+            document.getElementById('edit-record-pax').value = parseInt(rec.pax, 10) || 1;
+            document.getElementById('edit-record-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-record-modal').classList.add('hidden');
+        }
+
+        async function submitEditRecord(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-record-id').value;
+            const eventName = document.getElementById('edit-record-event').value;
+            const pakej = document.getElementById('edit-record-pakej').value.toUpperCase();
+            const nama = document.getElementById('edit-record-nama').value.trim().toUpperCase();
+            let phone = document.getElementById('edit-record-phone').value.replace(/\D/g, '');
+            if (phone.startsWith('0')) phone = '6' + phone;
+            else if (phone.startsWith('1')) phone = '60' + phone;
+            const pax = Math.max(1, parseInt(document.getElementById('edit-record-pax').value, 10) || 1);
+
+            setButtonLoading('btn-save-edit', true, 'Menyimpan...');
+            try {
+                const res = await fetch(state.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'edit_record',
+                        event: eventName,
+                        record: { id, pakej, nama, phone, pax }
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Gagal kemaskini');
+
+                closeEditModal();
+                await syncData(false);
+                showToast('Rekod jemaah telah berjaya dikemaskini.', 'info', 'Rekod Dikemaskini');
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal mengemaskini rekod di Google Sheet.', 'error');
+            } finally {
+                setButtonLoading('btn-save-edit', false);
+            }
+        }
+
+        // B3: Padam Rekod Jemaah
+        function openDeleteModal(id, eventName, nama) {
+            pendingDeleteTarget = { id, event: eventName, nama };
+            document.getElementById('delete-record-message').textContent =
+                `Rekod atas nama "${nama}" (${id}) akan dipadam daripada Google Sheet.`;
+            document.getElementById('delete-record-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeDeleteModal() {
+            pendingDeleteTarget = null;
+            document.getElementById('delete-record-modal').classList.add('hidden');
+        }
+
+        async function confirmDeleteRecord() {
+            if (!pendingDeleteTarget) return;
+            const target = { ...pendingDeleteTarget };
+            setButtonLoading('btn-confirm-delete', true, 'Memadam...');
+            try {
+                const res = await fetch(state.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'delete_record',
+                        event: target.event,
+                        id: target.id
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Gagal memadam');
+
+                closeDeleteModal();
+                await syncData(false);
+                showToast(`Rekod ${target.nama} telah dipadam.`, 'info', 'Rekod Dipadam');
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal memadam rekod daripada Google Sheet.', 'error');
+            } finally {
+                setButtonLoading('btn-confirm-delete', false);
+            }
         }
 
         function exportCSV() {
