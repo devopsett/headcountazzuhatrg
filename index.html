@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ms"> 
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -196,7 +196,7 @@
         let autoResetTimer = null;
 
         let state = {
-            apiUrl: localStorage.getItem(KEYS.API_URL) || DEFAULT_API_URL,
+            apiUrl: DEFAULT_API_URL,
             currentEvent: localStorage.getItem(KEYS.EVENT_NAME) || 'Ekspo Umrah & Haji 2026',
             isOpen: localStorage.getItem(KEYS.BOOTH_OPEN) !== 'false',
             kioskSeconds: parseInt(localStorage.getItem(KEYS.KIOSK_SECONDS) || '0', 10)
@@ -219,6 +219,34 @@
             }
         }
 
+        async function fetchRemoteConfig() {
+            if (!state.apiUrl) return;
+            try {
+                // Tambah timestamp untuk mengelakkan cache pelayar pada telefon/tablet
+                const url = `${state.apiUrl}?action=get_config&t=${Date.now()}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data && data.success) {
+                    if (data.activeEvent) {
+                        state.currentEvent = data.activeEvent;
+                        localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
+                        document.getElementById('banner-event-name').textContent = state.currentEvent;
+                    }
+                    if (typeof data.boothOpen === 'boolean') {
+                        state.isOpen = data.boothOpen;
+                        localStorage.setItem(KEYS.BOOTH_OPEN, String(state.isOpen));
+                        applyBoothStatus();
+                    }
+                    if (typeof data.kioskSeconds === 'number') {
+                        state.kioskSeconds = data.kioskSeconds;
+                        localStorage.setItem(KEYS.KIOSK_SECONDS, String(state.kioskSeconds));
+                    }
+                }
+            } catch (err) {
+                console.error('Gagal menyemak tetapan terkini:', err);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
             document.getElementById('banner-event-name').textContent = state.currentEvent;
@@ -229,36 +257,21 @@
                 badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 shrink-0';
                 badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Live';
 
-                // Semak nama event & tetapan semasa daripada Google Sheet
-                try {
-                    const res = await fetch(state.apiUrl);
-                    const data = await res.json();
-                    if (data.success) {
-                        if (data.activeEvent) {
-                            state.currentEvent = data.activeEvent;
-                            localStorage.setItem(KEYS.EVENT_NAME, state.currentEvent);
-                            document.getElementById('banner-event-name').textContent = state.currentEvent;
-                        }
-                        if (typeof data.boothOpen === 'boolean') {
-                            state.isOpen = data.boothOpen;
-                            localStorage.setItem(KEYS.BOOTH_OPEN, String(state.isOpen));
-                            applyBoothStatus();
-                        }
-                        if (typeof data.kioskSeconds === 'number') {
-                            state.kioskSeconds = data.kioskSeconds;
-                            localStorage.setItem(KEYS.KIOSK_SECONDS, String(state.kioskSeconds));
-                        }
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
+                await fetchRemoteConfig();
+
+                // Auto-semak status Buka/Tutup & Nama Event setiap 5 saat supaya semua device selari
+                setInterval(fetchRemoteConfig, 5000);
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) fetchRemoteConfig();
+                });
             }
         });
 
         function ubahPax(delta) {
             const input = document.getElementById('input-pax');
-            const nilaiBaru = Math.max(1, Math.min(100, (parseInt(input.value, 10) || 1) + delta));
-            input.value = nilaiBaru;
+            let val = parseInt(input.value, 10) || 1;
+            val = Math.max(1, Math.min(100, val + delta));
+            input.value = val;
         }
 
         async function submitJemaah(e) {
@@ -268,22 +281,23 @@
                 return;
             }
 
-            const btn = document.getElementById('btn-submit');
-            const pakej = document.querySelector('input[name="pakej"]:checked').value;
+            const pakejEl = document.querySelector('input[name="pakej"]:checked');
+            const pakej = pakejEl ? pakejEl.value : 'Umrah';
             const nama = document.getElementById('input-nama').value.trim();
             const phone = document.getElementById('input-phone').value.trim();
             const pax = Math.max(1, parseInt(document.getElementById('input-pax').value, 10) || 1);
 
             if (!nama || !phone) {
-                showToast('Sila lengkapkan Nama dan No. Telefon anda.', 'error');
+                showToast('Sila lengkapkan Nama Jemaah dan No. Telefon.', 'error');
                 return;
             }
 
+            const btn = document.getElementById('btn-submit');
+            const originalHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Menghantar...</span>';
-            lucide.createIcons();
+            btn.innerHTML = '<span>Menghantar...</span>';
 
-            const rekodBaru = {
+            const record = {
                 id: 'AZH-' + Math.floor(1000 + Math.random() * 9000),
                 timestamp: new Date().toISOString(),
                 event: state.currentEvent,
@@ -293,75 +307,91 @@
                 pax: pax
             };
 
-            if (state.apiUrl) {
-                try {
-                    await fetch(state.apiUrl, {
+            try {
+                if (state.apiUrl) {
+                    const res = await fetch(state.apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'add', record: rekodBaru })
+                        body: JSON.stringify({ action: 'add', record: record })
                     });
-                } catch (err) {
-                    console.error(err);
-                    showToast('Ralat sambungan, rekod disimpan secara sementara.', 'error');
-                }
-            }
-
-            // Simpan salinan tempatan
-            const localRecords = JSON.parse(localStorage.getItem(KEYS.DEMO_RECORDS) || '[]');
-            localRecords.unshift(rekodBaru);
-            localStorage.setItem(KEYS.DEMO_RECORDS, JSON.stringify(localRecords));
-
-            btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i><span>Hantar Pendaftaran</span>';
-            lucide.createIcons();
-
-            document.getElementById('form-card').classList.add('hidden');
-            document.getElementById('success-summary').textContent = `${nama} • Pakej ${pakej} (${pax} Pax)`;
-            document.getElementById('success-card').classList.remove('hidden');
-
-            // Jalankan Mod Kiosk Auto-Reset jika diaktifkan oleh Admin
-            if (autoResetTimer) clearInterval(autoResetTimer);
-            const noticeEl = document.getElementById('auto-reset-notice');
-            if (state.kioskSeconds > 0) {
-                let remaining = state.kioskSeconds;
-                noticeEl.classList.remove('hidden');
-                noticeEl.textContent = `Borang akan ditetapkan semula secara automatik dalam ${remaining} saat...`;
-                autoResetTimer = setInterval(() => {
-                    remaining--;
-                    if (remaining <= 0) {
-                        clearInterval(autoResetTimer);
-                        resetUntukJemaahBaru();
-                    } else {
-                        noticeEl.textContent = `Borang akan ditetapkan semula secara automatik dalam ${remaining} saat...`;
+                    const data = await res.json();
+                    if (!data.success) {
+                        if (data.error === 'Booth ditutup') {
+                            state.isOpen = false;
+                            applyBoothStatus();
+                            return;
+                        }
+                        throw new Error(data.error || 'Gagal menyimpan');
                     }
-                }, 1000);
-            } else {
-                noticeEl.classList.add('hidden');
+                } else {
+                    const existing = JSON.parse(localStorage.getItem(KEYS.DEMO_RECORDS) || '[]');
+                    existing.unshift(record);
+                    localStorage.setItem(KEYS.DEMO_RECORDS, JSON.stringify(existing));
+                }
+
+                document.getElementById('form-card').classList.add('hidden');
+                const successCard = document.getElementById('success-card');
+                successCard.classList.remove('hidden');
+                document.getElementById('success-summary').textContent =
+                    `${nama} (${pakej} • ${pax} Pax) telah didaftarkan untuk ${state.currentEvent}.`;
+
+                const autoNotice = document.getElementById('auto-reset-notice');
+                if (autoResetTimer) clearInterval(autoResetTimer);
+
+                if (state.kioskSeconds > 0) {
+                    let remaining = state.kioskSeconds;
+                    autoNotice.classList.remove('hidden');
+                    autoNotice.textContent = `Borang akan ditetapkan semula secara automatik dalam ${remaining} saat...`;
+                    autoResetTimer = setInterval(() => {
+                        remaining -= 1;
+                        if (remaining <= 0) {
+                            clearInterval(autoResetTimer);
+                            resetUntukJemaahBaru();
+                        } else {
+                            autoNotice.textContent = `Borang akan ditetapkan semula secara automatik dalam ${remaining} saat...`;
+                        }
+                    }, 1000);
+                } else {
+                    autoNotice.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Ralat semasa menghantar rekod. Sila cuba lagi.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                lucide.createIcons();
             }
         }
 
         function resetUntukJemaahBaru() {
-            if (autoResetTimer) clearInterval(autoResetTimer);
-            document.getElementById('auto-reset-notice').classList.add('hidden');
+            if (autoResetTimer) {
+                clearInterval(autoResetTimer);
+                autoResetTimer = null;
+            }
             document.getElementById('jemaah-form').reset();
-            document.getElementById('input-pax').value = 1;
+            document.getElementById('input-pax').value = '1';
+            document.getElementById('auto-reset-notice').classList.add('hidden');
             document.getElementById('success-card').classList.add('hidden');
-            applyBoothStatus();
+            if (state.isOpen) {
+                document.getElementById('form-card').classList.remove('hidden');
+            } else {
+                document.getElementById('closed-card').classList.remove('hidden');
+            }
         }
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const colors = type === 'error'
+            const bgClass = type === 'error'
                 ? 'bg-rose-600 text-white'
-                : 'bg-azzuha-700 text-white';
-
-            toast.className = `${colors} px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto`;
+                : 'bg-azzuha-800 text-white';
+            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-lg text-xs font-bold flex items-center justify-between gap-3 pointer-events-auto transition-all`;
             toast.innerHTML = `<span>${message}</span>`;
             container.appendChild(toast);
-
             setTimeout(() => {
-                toast.remove();
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
     </script>
