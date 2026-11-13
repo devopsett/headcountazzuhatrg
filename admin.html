@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ms"> 
+<html lang="ms">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,8 +35,22 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Notifikasi Toast -->
-    <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-sm sm:w-full pointer-events-none mx-auto sm:mx-0"></div>
+    <!-- Modal Popup Status (Tengah Skrin - Jelas & Tidak Melindungi Butang) -->
+    <div id="status-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="closeStatusModal()">
+        <div class="bg-white w-full max-w-xs sm:max-w-sm rounded-3xl shadow-2xl border border-slate-200 p-6 text-center space-y-4 transform transition-all" onclick="event.stopPropagation()">
+            <div id="status-modal-icon" class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
+                <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 id="status-modal-title" class="text-base sm:text-lg font-extrabold text-slate-900">Berjaya</h3>
+                <p id="status-modal-message" class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed"></p>
+            </div>
+            <button type="button" id="status-modal-btn" onclick="closeStatusModal()"
+                class="w-full py-3 px-4 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white font-extrabold text-sm shadow-sm transition-all">
+                OK, Faham
+            </button>
+        </div>
+    </div>
 
     <!-- Modal / Popup Log Masuk Admin -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-azzuha-950/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -348,6 +362,7 @@
                 sessionStorage.setItem(KEYS.ADMIN_AUTH, 'true');
                 errorEl.classList.add('hidden');
                 unlockAdminPanel();
+                showToast('Anda telah berjaya log masuk sebagai Admin Azzuha.', 'info', 'Log Masuk Berjaya');
             } else {
                 errorEl.classList.remove('hidden');
             }
@@ -389,7 +404,7 @@
             document.getElementById('current-admin-pass').value = '';
             document.getElementById('new-admin-pass').value = '';
             document.getElementById('confirm-admin-pass').value = '';
-            showToast('Password Admin berjaya dikemaskini!', 'info');
+            showToast('Kata laluan Admin baharu telah berjaya dikemaskini.', 'info', 'Password Berjaya Ditukar');
         }
 
         function updateBoothToggleLabel() {
@@ -462,13 +477,13 @@
                             kioskSeconds: kioskSeconds
                         })
                     });
-                    showToast('Tetapan event & operasi booth berjaya disimpan!', 'info');
+                    showToast('Tetapan event dan operasi booth telah berjaya disimpan.', 'info', 'Tetapan Berjaya Disimpan');
                 } catch (err) {
                     console.error(err);
-                    showToast('Tetapan disimpan secara lokal, tetapi gagal menyelaraskan ke Google Sheet.', 'error');
+                    showToast('Tetapan disimpan secara lokal, tetapi gagal menyelaraskan ke Google Sheet.', 'error', 'Ralat Penyelarasan');
                 }
             } else {
-                showToast('Tetapan berjaya disimpan!', 'info');
+                showToast('Tetapan event dan operasi booth telah berjaya disimpan.', 'info', 'Tetapan Berjaya Disimpan');
             }
 
             initData();
@@ -690,20 +705,33 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const colors = type === 'error'
-                ? 'bg-rose-600 text-white'
-                : 'bg-azzuha-700 text-white';
+        function closeStatusModal() {
+            document.getElementById('status-modal').classList.add('hidden');
+        }
 
-            toast.className = `${colors} px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto`;
-            toast.innerHTML = `<span>${message}</span>`;
-            container.appendChild(toast);
+        function showToast(message, type = 'info', title = '') {
+            const modal = document.getElementById('status-modal');
+            const iconWrap = document.getElementById('status-modal-icon');
+            const titleEl = document.getElementById('status-modal-title');
+            const msgEl = document.getElementById('status-modal-message');
+            const btnEl = document.getElementById('status-modal-btn');
 
-            setTimeout(() => {
-                toast.remove();
-            }, 3500);
+            const isError = type === 'error';
+            titleEl.textContent = title || (isError ? 'Perhatian' : 'Berjaya');
+            msgEl.textContent = message;
+
+            if (isError) {
+                iconWrap.className = 'w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-xs';
+                iconWrap.innerHTML = '<i data-lucide="alert-circle" class="w-8 h-8"></i>';
+                btnEl.className = 'w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm shadow-sm transition-all';
+            } else {
+                iconWrap.className = 'w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs';
+                iconWrap.innerHTML = '<i data-lucide="check-circle-2" class="w-8 h-8"></i>';
+                btnEl.className = 'w-full py-3 px-4 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white font-extrabold text-sm shadow-sm transition-all';
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
         }
     </script>
 </body>
