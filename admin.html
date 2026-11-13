@@ -172,8 +172,10 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2 sm:self-end shrink-0">
-                    <button type="button" onclick="syncData(true)" class="px-3.5 py-2.5 rounded-xl bg-azzuha-50 hover:bg-azzuha-100 text-azzuha-800 border border-azzuha-200 text-xs font-bold flex items-center gap-1.5 transition-colors">
-                        <i id="sync-icon" data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    <button type="button" id="btn-refresh" onclick="syncData(true)" class="px-3.5 py-2.5 rounded-xl bg-azzuha-50 hover:bg-azzuha-100 text-azzuha-800 border border-azzuha-200 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                        <span id="sync-icon" class="inline-flex items-center justify-center">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        </span>
                         <span>Refresh</span>
                     </button>
                     <button type="button" onclick="exportCSV()" class="px-3.5 py-2.5 rounded-xl bg-azzuha-600 hover:bg-azzuha-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors">
@@ -610,7 +612,9 @@
         async function syncData(manual = false) {
             if (!state.apiUrl) return;
             const icon = document.getElementById('sync-icon');
+            const btn = document.getElementById('btn-refresh');
             if (icon) icon.classList.add('animate-spin');
+            if (btn) btn.disabled = true;
 
             try {
                 // Gunakan parameter masa (?t=) supaya pelayar sentiasa tarik data segar dari Google Sheet
@@ -647,6 +651,7 @@
                 if (manual) showToast('Gagal menyambung ke Google Sheet.', 'error');
             } finally {
                 if (icon) icon.classList.remove('animate-spin');
+                if (btn) btn.disabled = false;
             }
         }
 
